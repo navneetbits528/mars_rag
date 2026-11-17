@@ -1,0 +1,1 @@
+# Mars Missions RAG\n\nSee `README_PHASE2.md` for Phase 2 ingestion instructions.\n

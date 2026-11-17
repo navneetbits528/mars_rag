@@ -1,0 +1,45 @@
+import re
+from collections import Counter
+from dataclasses import dataclass
+from marsrag.ingestion.models import PageText
+
+def normalize_line(line: str) -> str:
+    return re.sub(r"[ \t]+"," ",line.strip()).casefold()
+
+_PAGE=re.compile(r"^\s*(?:page\s+)?\d{1,4}(?:\s+of\s+\d{1,4})?\s*$",re.I)
+_TOC=re.compile(r"^.{2,100}\.{2,}\s*\d{1,4}\s*$")
+_REF=re.compile(r"^\s*(references|bibliography|works cited|selected bibliography|references and notes|endnotes)\s*$",re.I)
+
+@dataclass
+class CleanResult:
+    pages: list[PageText]
+    removed_repeated_lines: set[str]
+
+def _repeated(pages,threshold=0.40):
+    counts=Counter()
+    for page in pages:
+        lines=[normalize_line(x) for x in page.text.splitlines() if normalize_line(x)]
+        for line in set(lines[:3]+lines[-3:]):
+            if len(line)>=3: counts[line]+=1
+    needed=max(1,int(len(pages)*threshold+0.999))
+    return {line for line,count in counts.items() if count>=needed}
+
+def clean_pages(pages: list[PageText]) -> CleanResult:
+    repeated=_repeated(pages)
+    cleaned=[]
+    in_refs=False
+    for page in pages:
+        output=[]
+        for raw in page.text.splitlines():
+            line=raw.strip()
+            if not line: continue
+            norm=normalize_line(line)
+            if norm in repeated or _PAGE.match(line) or _TOC.match(line): continue
+            if _REF.match(line):
+                in_refs=True
+                continue
+            if in_refs: continue
+            if re.match(r"^\s*(table of contents|contents)\s*$",line,re.I): continue
+            output.append(re.sub(r"[ \t]+"," ",line))
+        cleaned.append(PageText(page.page_number,"\n".join(output)))
+    return CleanResult(cleaned,repeated)

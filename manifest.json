@@ -1,0 +1,26 @@
+[
+  {
+    "file": "data/pdfs/mars_dra_5.pdf",
+    "title": "Human Exploration of Mars Design Reference Architecture 5.0",
+    "report_no": "NASA/SP-2009-566",
+    "year": 2009,
+    "url": "https://www.nasa.gov/wp-content/uploads/2015/01/373665main_NASA-SP-2009-566.pdf",
+    "status": "superseded"
+  },
+  {
+    "file": "data/pdfs/moon_to_mars_architecture.pdf",
+    "title": "Moon to Mars Architecture",
+    "report_no": "NASA-M2M-ARCH",
+    "year": 2024,
+    "url": "https://www.nasa.gov/moontomarsarchitecture/",
+    "status": "current"
+  },
+  {
+    "file": "data/pdfs/hrp_evidence_report.pdf",
+    "title": "Human Research Program Evidence Reports",
+    "report_no": "NASA-HRP-EVIDENCE",
+    "year": 2024,
+    "url": "https://www.nasa.gov/hrp/",
+    "status": "current"
+  }
+]
