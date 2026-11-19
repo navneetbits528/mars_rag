@@ -14,6 +14,8 @@ tenacity<10,>=9
 structlog<26,>=24.4
 PyMuPDF<2,>=1.24
 pdfplumber<1,>=0.11
+pytesseract<1,>=0.3.13
+Pillow<13,>=10
 
 [dev]
 pytest<9,>=8

@@ -18,6 +18,8 @@ Requires-Dist: tenacity<10,>=9
 Requires-Dist: structlog<26,>=24.4
 Requires-Dist: PyMuPDF<2,>=1.24
 Requires-Dist: pdfplumber<1,>=0.11
+Requires-Dist: pytesseract<1,>=0.3.13
+Requires-Dist: Pillow<13,>=10
 Provides-Extra: dev
 Requires-Dist: pytest<9,>=8; extra == "dev"
 Requires-Dist: pytest-asyncio<2,>=0.24; extra == "dev"
