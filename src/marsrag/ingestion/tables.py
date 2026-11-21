@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import re
 from pathlib import Path
 
@@ -11,13 +12,41 @@ from marsrag.ingestion.chunker import stable_chunk_id, normalize_text
 _FIGURE_CAPTION = re.compile(r"^\s*(?:Figure|Fig\.)\s+\d+(?:[.-]\d+)*\s*[:.]?\s*.+", re.I)
 
 
-def _markdown_table(rows: list[list[str | None]]) -> str:
-    cleaned = [[(cell or "").replace("\n", " ").strip() for cell in row] for row in rows]
+def _clean_table(rows: list[list[str | None]]) -> list[list[str]]:
+    cleaned = [[re.sub(r"\s+", " ", cell or "").strip() for cell in row] for row in rows]
     cleaned = [row for row in cleaned if any(row)]
+    if not cleaned:
+        return []
+    width = max(len(row) for row in cleaned)
+    return [row + [""] * (width - len(row)) for row in cleaned]
+
+
+def _is_structured_table(rows: list[list[str | None]]) -> bool:
+    """Reject paragraph-like false positives returned by PDF table heuristics."""
+    cleaned = _clean_table(rows)
+    if len(cleaned) < 2 or max(map(len, cleaned), default=0) < 2:
+        return False
+    width = max(map(len, cleaned))
+    if width < 2:
+        return False
+    populated = [cell for row in cleaned for cell in row if cell]
+    if len(populated) < 4:
+        return False
+    # A table extractor that returns a whole page as one or two giant cells is
+    # almost always detecting page layout, not a tabular structure.
+    if max((len(cell) for cell in populated), default=0) > 700:
+        return False
+    rows_with_multiple_cells = sum(sum(bool(cell) for cell in row) >= 2 for row in cleaned)
+    if rows_with_multiple_cells < 2:
+        return False
+    return True
+
+
+def _markdown_table(rows: list[list[str | None]]) -> str:
+    cleaned = _clean_table(rows)
     if not cleaned:
         return ""
     width = max(len(row) for row in cleaned)
-    cleaned = [row + [""] * (width - len(row)) for row in cleaned]
     header = cleaned[0]
     separator = ["---"] * width
     lines = ["| " + " | ".join(header) + " |", "| " + " | ".join(separator) + " |"]
@@ -32,10 +61,13 @@ def extract_table_chunks(pdf_path: str | Path, pages: list[PageText], *, report_
     with pdfplumber.open(str(pdf_path)) as pdf:
         for page_number, page in enumerate(pdf.pages, start=1):
             for table_index, table in enumerate(page.extract_tables() or [], start=1):
+                if not _is_structured_table(table):
+                    continue
                 markdown = _markdown_table(table)
                 if not markdown:
                     continue
-                source_text = page_lookup.get(page_number).text if page_number in page_lookup else ""
+                source_page = page_lookup.get(page_number)
+                source_text = source_page.text if source_page else ""
                 lines = [line.strip() for line in source_text.splitlines() if line.strip()]
                 caption = next((line for line in reversed(lines)
                                 if len(line) <= 240 and (line.lower().startswith("table ") or
@@ -47,16 +79,15 @@ def extract_table_chunks(pdf_path: str | Path, pages: list[PageText], *, report_
                     chunk_id, report_no, page_number, title, int(year), status, url,
                     caption or "Table", caption or "Tables", "table", content,
                     f"Table: {caption}\n{content}" if caption else f"Table\n{content}",
-                    __import__("hashlib").sha256(normalized.encode()).hexdigest(),
-                    {"table_index": table_index, "ocr": bool(page_lookup.get(page_number) and
-                     page_lookup[page_number].metadata.get("ocr"))},
+                    hashlib.sha256(normalized.encode()).hexdigest(),
+                    {"table_index": table_index, "ocr": bool(source_page and
+                     source_page.metadata.get("ocr"))},
                 ))
     return chunks
 
 
 def extract_figure_caption_chunks(pages: list[PageText], *, report_no: str, title: str,
                                   year: int, url: str, status: str) -> list[ChunkRecord]:
-    import hashlib
     chunks: list[ChunkRecord] = []
     for page in pages:
         for line in page.text.splitlines():
