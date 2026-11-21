@@ -238,12 +238,43 @@ def _store_prepared(item, vectors, facts):
                 conn.execute("DELETE FROM parents WHERE report_no=%s", (entry["report_no"],))
             for fact in facts:
                 conn.execute(
-                    """INSERT INTO facts(fact_id,parameter,value,unit,context,report_no,page,
-                    source_chunk_id,quote) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                    ON CONFLICT(fact_id) DO UPDATE SET parameter=EXCLUDED.parameter,value=EXCLUDED.value,
-                    unit=EXCLUDED.unit,context=EXCLUDED.context,quote=EXCLUDED.quote""",
-                    (fact["fact_id"], fact["parameter"], fact["value"], fact["unit"], fact["context"],
-                     fact["report_no"], fact["page"], fact["source_chunk_id"], fact["quote"]),
+                    """
+                    INSERT INTO facts(
+                        fact_id,
+                        parameter,
+                        value,
+                        unit,
+                        context,
+                        domain,
+                        category,
+                        report_no,
+                        page,
+                        source_chunk_id,
+                        quote
+                    )
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    ON CONFLICT(fact_id) DO UPDATE SET
+                        parameter = EXCLUDED.parameter,
+                        value = EXCLUDED.value,
+                        unit = EXCLUDED.unit,
+                        context = EXCLUDED.context,
+                        domain = EXCLUDED.domain,
+                        category = EXCLUDED.category,
+                        quote = EXCLUDED.quote
+                    """,
+                    (
+                        fact["fact_id"],
+                        fact["parameter"],
+                        fact["value"],
+                        fact.get("unit"),
+                        fact.get("context"),
+                        fact.get("domain", "General"),
+                        fact.get("category", "Other"),
+                        fact["report_no"],
+                        fact["page"],
+                        fact["source_chunk_id"],
+                        fact["quote"],
+                    ),
                 )
             conn.execute(
                 """INSERT INTO ingest_files(file_path,report_no,file_sha256,processed_at)
