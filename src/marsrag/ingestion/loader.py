@@ -7,66 +7,91 @@ from marsrag.ingestion.ocr import ocr_page
 from marsrag.settings import get_settings
 
 
-def _layout_aware_text(page) -> str:
-    """Extract text in reading order, detecting clear two-column layouts.
-
-    PyMuPDF's ``sort=True`` sorts by coordinates, but can interleave lines from
-    adjacent columns. This helper only switches to column-major ordering when
-    the page has a clear vertical gutter with text blocks on both sides.
-    Otherwise it keeps PyMuPDF's normal sorted extraction.
-    """
-    blocks = []
+def _text_blocks(page):
+    """Return non-empty text blocks as (x0, y0, x1, y1, text)."""
+    result = []
     for block in page.get_text("blocks"):
         if len(block) < 7 or int(block[6]) != 0:
             continue
         text = (block[4] or "").strip()
         if text:
-            blocks.append((float(block[0]), float(block[1]), float(block[2]),
-                           float(block[3]), text))
+            result.append((float(block[0]), float(block[1]), float(block[2]), float(block[3]), text))
+    return result
 
+
+def _column_groups(blocks, page_width, page_height):
+    """Cluster paragraph blocks by their left edge; ignore page furniture."""
+    candidates = [
+        b for b in blocks
+        if len(b[4]) >= 40
+        and b[1] < page_height * 0.82
+        and b[3] < page_height * 0.86
+        and 0 < (b[2] - b[0]) < page_width * 0.48
+    ]
+    if len(candidates) < 4:
+        return []
+
+    # Group blocks whose left edges are close. This works for narrow and wide
+    # columns and avoids treating paragraph line wrapping as separate columns.
+    gap = max(45.0, page_width * 0.075)
+    by_left = sorted(candidates, key=lambda b: b[0])
+    groups = [[by_left[0]]]
+    for block in by_left[1:]:
+        current_mean = sum(x[0] for x in groups[-1]) / len(groups[-1])
+        if block[0] - current_mean > gap:
+            groups.append([block])
+        else:
+            groups[-1].append(block)
+
+    # A genuine column should have at least two substantial paragraph blocks.
+    groups = [g for g in groups if len(g) >= 2]
+    if len(groups) < 2:
+        return []
+    return groups
+
+
+def _layout_aware_text(page) -> str:
+    """Read multi-column pages one column at a time, left to right."""
+    blocks = _text_blocks(page)
     if len(blocks) < 4:
         return (page.get_text("text", sort=True) or "").strip()
 
     page_width = float(page.rect.width)
-    intervals = sorted((b[0], b[2]) for b in blocks if b[2] > b[0])
-    merged = []
-    for left, right in intervals:
-        if not merged or left > merged[-1][1]:
-            merged.append([left, right])
-        else:
-            merged[-1][1] = max(merged[-1][1], right)
-
-    candidates = []
-    for (_, left_end), (right_start, _) in zip(merged, merged[1:]):
-        gap = right_start - left_end
-        if gap >= max(18.0, page_width * 0.035):
-            midpoint = (left_end + right_start) / 2
-            left_count = sum(1 for b in blocks if (b[0] + b[2]) / 2 < midpoint)
-            right_count = sum(1 for b in blocks if (b[0] + b[2]) / 2 > midpoint)
-            if left_count >= 2 and right_count >= 2:
-                balance = min(left_count, right_count) / max(left_count, right_count)
-                candidates.append((gap * balance, left_end, right_start))
-
-    if not candidates:
+    page_height = float(page.rect.height)
+    groups = _column_groups(blocks, page_width, page_height)
+    if len(groups) < 2:
         return (page.get_text("text", sort=True) or "").strip()
 
-    _, gutter_left, gutter_right = max(candidates)
-    left_blocks, right_blocks, spanning = [], [], []
+    columns = []
+    for group in groups:
+        left = sum(b[0] for b in group) / len(group)
+        columns.append((left, []))
+
+    furniture = []
     for block in blocks:
         x0, y0, x1, y1, text = block
-        if x0 < gutter_left and x1 > gutter_right:
-            spanning.append(block)
-        elif (x0 + x1) / 2 <= (gutter_left + gutter_right) / 2:
-            left_blocks.append(block)
-        else:
-            right_blocks.append(block)
+        width = x1 - x0
+        # Wide blocks (titles, banners, footer links) and bottom-page items
+        # are kept outside the column bodies.
+        if width >= page_width * 0.48 or y0 >= page_height * 0.82 or y1 >= page_height * 0.86:
+            furniture.append(block)
+            continue
+        center_x = (x0 + x1) / 2
+        # Assign by left edge, not center: column widths can differ greatly.
+        idx = min(range(len(columns)), key=lambda i: abs(x0 - columns[i][0]))
+        columns[idx][1].append(block)
 
-    # Full-width titles/captions generally precede the column content.
-    spanning.sort(key=lambda b: (b[1], b[0]))
-    left_blocks.sort(key=lambda b: (b[1], b[0]))
-    right_blocks.sort(key=lambda b: (b[1], b[0]))
-    ordered = spanning + left_blocks + right_blocks
-    return "\n".join(block[4] for block in ordered).strip()
+    for _, column in columns:
+        column.sort(key=lambda b: (b[1], b[0]))
+
+    top = sorted((b for b in furniture if b[3] <= page_height * 0.18), key=lambda b: (b[1], b[0]))
+    bottom = sorted((b for b in furniture if b not in top), key=lambda b: (b[1], b[0]))
+
+    ordered = top[:]
+    for _, column in sorted(columns, key=lambda item: item[0]):
+        ordered.extend(column)
+    ordered.extend(bottom)
+    return "\n".join(b[4] for b in ordered).strip()
 
 
 def load_pdf_pages(pdf_path: str | Path) -> list[PageText]:
