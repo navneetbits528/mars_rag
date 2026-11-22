@@ -317,3 +317,53 @@ def test_semantic_cache_is_bypassed_for_conversation_history(monkeypatch):
     embed.assert_not_called()
     lookup.assert_not_called()
     generate.assert_called_once()
+
+
+def test_semantic_cache_lookup_failure_falls_back_to_retrieval(monkeypatch):
+    _enable_cache(monkeypatch)
+    with (
+        patch("marsrag.qa.embed_query", return_value=[0.1, 0.2]),
+        patch("marsrag.qa.find_cached_answer", side_effect=RuntimeError("database unavailable")),
+        patch("marsrag.qa.search_hybrid", return_value=[]) as retrieve,
+        patch("marsrag.qa.generate_answer") as generate,
+    ):
+        answer_question("What does the report say?")
+
+    retrieve.assert_called_once()
+    generate.assert_called_once()
+
+
+def test_semantic_cache_store_failure_does_not_discard_answer(monkeypatch):
+    _enable_cache(monkeypatch)
+    expected = AnswerResponse(
+        answer="Verified answer",
+        abstained=False,
+        verified=True,
+        citations=[],
+    )
+    with (
+        patch("marsrag.qa.embed_query", return_value=[0.1, 0.2]),
+        patch("marsrag.qa.find_cached_answer", return_value=None),
+        patch("marsrag.qa.search_hybrid", return_value=[]),
+        patch("marsrag.qa.generate_answer", return_value=expected),
+        patch("marsrag.qa.store_verified_answer", side_effect=RuntimeError("database unavailable")),
+    ):
+        result = answer_question("What does the report say?")
+
+    assert result is expected
+
+
+def test_semantic_cache_budget_exhaustion_is_not_silenced(monkeypatch):
+    from marsrag.llm import RequestBudgetExceeded
+
+    _enable_cache(monkeypatch)
+    with (
+        patch("marsrag.qa.embed_query", return_value=[0.1, 0.2]),
+        patch("marsrag.qa.find_cached_answer", side_effect=RequestBudgetExceeded("limit")),
+        patch("marsrag.qa.search_hybrid") as retrieve,
+    ):
+        result = answer_question("What does the report say?")
+
+    assert result.abstained is True
+    assert result.reason == "Configured API budget exhausted."
+    retrieve.assert_not_called()
