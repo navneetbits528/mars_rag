@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "dataset_name": "mars-cache-equivalence-v1",
+  "description": "Human-reviewed pairs: true means reusing the cached answer is safe; false means it is not.",
+  "pairs": [
+    {
+      "id": "equivalent-example",
+      "cached_question": "How long is the transit duration?",
+      "candidate_question": "What is the duration of the transit?",
+      "equivalent": true
+    },
+    {
+      "id": "non-equivalent-example",
+      "cached_question": "How long is the transit duration?",
+      "candidate_question": "How long is the surface stay?",
+      "equivalent": false
+    }
+  ]
+}
