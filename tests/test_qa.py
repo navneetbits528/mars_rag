@@ -224,4 +224,4 @@ def test_answer_question_returns_abstention_when_request_budget_is_exhausted():
 
     assert result.abstained is True
     assert result.verified is False
-    assert result.reason == "Per-request API budget exhausted."
+    assert result.reason == "Configured API budget exhausted."
