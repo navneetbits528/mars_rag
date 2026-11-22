@@ -48,6 +48,9 @@ def ask(request: AskRequest) -> AnswerResponse:
             chunk_type=request.chunk_type,
             use_reranker=request.use_reranker,
             model_tier=request.model_tier,
+            conversation_history=[
+                item.model_dump() for item in request.conversation_history
+            ],
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
