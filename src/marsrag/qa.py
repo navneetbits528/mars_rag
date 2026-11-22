@@ -8,6 +8,7 @@ from marsrag.retrieval.dense import DEFAULT_REPORT_NO
 from marsrag.retrieval.hybrid import search_hybrid
 
 QUERY_RRF_K = 60
+MAX_RETRIEVAL_QUERIES = 5
 
 
 def _merge_query_results(
@@ -31,6 +32,24 @@ def _merge_query_results(
     )[:top_k]
 
 
+def _build_retrieval_queries(plan: Any) -> list[str]:
+    """Build a bounded retrieval plan, prioritizing decomposed multi-hop questions."""
+    if plan.route == "multi_hop":
+        candidates = [
+            plan.standalone_query,
+            *plan.sub_questions,
+            *plan.search_queries,
+        ]
+    else:
+        candidates = [plan.standalone_query, *plan.search_queries]
+
+    return list(dict.fromkeys(
+        query.strip()
+        for query in candidates
+        if query and query.strip()
+    ))[:MAX_RETRIEVAL_QUERIES]
+
+
 def answer_question(
     question: str,
     *,
@@ -41,7 +60,7 @@ def answer_question(
     use_reranker: bool = False,
     model_tier: str = "main",
 ) -> AnswerResponse:
-    """Analyze the question, retrieve across query variants, then generate an answer."""
+    """Analyze, decompose when needed, retrieve evidence, and generate an answer."""
     if not question or not question.strip():
         raise ValueError("Question cannot be empty.")
 
@@ -57,10 +76,7 @@ def answer_question(
             reason="Clarification is required before searching the report.",
         )
 
-    queries = list(dict.fromkeys(
-        [plan.standalone_query, *plan.search_queries]
-    ))[:3]
-
+    queries = _build_retrieval_queries(plan)
     result_sets = [
         search_hybrid(
             query,
