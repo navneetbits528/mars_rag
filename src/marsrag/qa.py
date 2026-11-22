@@ -210,9 +210,9 @@ def answer_question(
             )
     except RequestBudgetExceeded:
         return AnswerResponse(
-            answer="This request reached its configured AI API-call limit. Please simplify the question or try again later.",
+            answer="The configured AI API budget has been reached. Please try again later.",
             abstained=True,
             verified=False,
-            reason="Per-request API budget exhausted.",
+            reason="Configured API budget exhausted.",
         )
     return result["response"]
