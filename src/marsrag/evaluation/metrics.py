@@ -94,3 +94,116 @@ def evaluate_retrieval(
         "metrics": metrics,
         "per_example": per_example,
     }
+
+
+import re
+
+
+def normalize_answer(value: str) -> str:
+    """Normalize answer text for deterministic lexical comparison."""
+    value = value.casefold()
+    value = re.sub(r"[^a-z0-9\\s]", " ", value)
+    return " ".join(value.split())
+
+
+def exact_match_score(prediction: str, expected: str) -> float:
+    """Return 1 for normalized exact match, otherwise 0."""
+    return float(normalize_answer(prediction) == normalize_answer(expected))
+
+
+def token_f1_score(prediction: str, expected: str) -> float:
+    """Token-overlap F1; useful alongside exact match for concise factual answers."""
+    predicted_tokens = normalize_answer(prediction).split()
+    expected_tokens = normalize_answer(expected).split()
+    if not predicted_tokens or not expected_tokens:
+        return float(predicted_tokens == expected_tokens)
+
+    predicted_counts: dict[str, int] = {}
+    expected_counts: dict[str, int] = {}
+    for token in predicted_tokens:
+        predicted_counts[token] = predicted_counts.get(token, 0) + 1
+    for token in expected_tokens:
+        expected_counts[token] = expected_counts.get(token, 0) + 1
+
+    overlap = sum(
+        min(count, expected_counts.get(token, 0))
+        for token, count in predicted_counts.items()
+    )
+    if overlap == 0:
+        return 0.0
+    precision = overlap / len(predicted_tokens)
+    recall = overlap / len(expected_tokens)
+    return 2 * precision * recall / (precision + recall)
+
+
+def evaluate_answers(
+    dataset: EvalDataset,
+    answer_fn: Callable[[str, str], dict[str, Any]],
+) -> dict[str, Any]:
+    """Evaluate answer quality using a deterministic callback.
+
+    answer_fn receives (question, report_no) and returns a mapping with:
+    answer, abstained, verified, citations, and retrieved_chunk_ids.
+    Faithfulness is operationalized as the system's verified flag, which
+    represents successful citation and claim-support verification.
+    """
+    per_example: list[dict[str, Any]] = []
+
+    for example in dataset.examples:
+        result = answer_fn(example.question, example.report_no)
+        abstained = bool(result.get("abstained", False))
+        verified = bool(result.get("verified", False))
+        answer = str(result.get("answer") or "")
+        citations = result.get("citations") or []
+        retrieved_ids = {
+            str(chunk_id) for chunk_id in result.get("retrieved_chunk_ids", [])
+        }
+        citation_ids = [
+            str(citation.get("chunk_id"))
+            for citation in citations
+            if isinstance(citation, dict) and citation.get("chunk_id")
+        ]
+        citation_validity = (
+            bool(citation_ids)
+            and bool(retrieved_ids)
+            and all(chunk_id in retrieved_ids for chunk_id in citation_ids)
+        )
+
+        row: dict[str, Any] = {
+            "id": example.id,
+            "expected_answerable": example.answerable,
+            "predicted_abstained": abstained,
+            "abstention_correct": abstained == (not example.answerable),
+            "citation_valid": citation_validity,
+            "faithful": verified and citation_validity,
+        }
+        if example.answerable:
+            row["exact_match"] = exact_match_score(answer, example.expected_answer or "")
+            row["token_f1"] = token_f1_score(answer, example.expected_answer or "")
+        else:
+            row["exact_match"] = None
+            row["token_f1"] = None
+        per_example.append(row)
+
+    answerable = [row for row in per_example if row["expected_answerable"]]
+    unanswerable = [row for row in per_example if not row["expected_answerable"]]
+
+    def average(rows: Sequence[dict[str, Any]], key: str) -> float:
+        values = [float(row[key]) for row in rows if row[key] is not None]
+        return mean(values) if values else 0.0
+
+    return {
+        "dataset_name": dataset.dataset_name,
+        "corpus_report_no": dataset.corpus_report_no,
+        "total_examples": len(per_example),
+        "answerable_examples": len(answerable),
+        "unanswerable_examples": len(unanswerable),
+        "metrics": {
+            "exact_match": average(answerable, "exact_match"),
+            "token_f1": average(answerable, "token_f1"),
+            "citation_validity": average(per_example, "citation_valid"),
+            "faithfulness": average(per_example, "faithful"),
+            "abstention_accuracy": average(per_example, "abstention_correct"),
+        },
+        "per_example": per_example,
+    }
