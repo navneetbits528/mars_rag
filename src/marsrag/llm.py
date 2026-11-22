@@ -25,7 +25,13 @@ def request_api_budget(max_requests: int):
     try:
         yield state
     finally:
-        _request_api_calls.reset(token)
+        try:
+            _request_api_calls.reset(token)
+        except ValueError:
+            # StreamingResponse may advance a synchronous generator in different
+            # copied contexts across thread-pool iterations. A ContextVar token
+            # can only be reset in the context where it was created.
+            _request_api_calls.set(None)
 
 @dataclass
 class UsageTotals:
