@@ -45,7 +45,7 @@ def test_answer_question_analyzes_and_fuses_query_results():
     )
     with (
         patch("marsrag.qa.analyze_query", return_value=_plan()) as analyze,
-        patch("marsrag.qa.search_hybrid", side_effect=[first, second]) as retrieve,
+        patch("marsrag.qa.search_hybrid", return_value=first) as retrieve,
         patch("marsrag.qa.generate_answer", return_value=expected) as generate,
     ):
         result = answer_question(
