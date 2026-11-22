@@ -96,24 +96,24 @@ def test_ask_stream_emits_answer_and_done_events(monkeypatch):
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/event-stream")
     assert "Cache-Control" in response.headers
-    events = response.text.strip().split("\\n\\n")
-    assert events[0] == 'event: status\\ndata: {"stage": "drafting"}'
-    assert events[1] == 'event: token\\ndata: {"text": "Evidence-backed ", "verified": false}'
-    assert events[2] == 'event: token\\ndata: {"text": "answer.", "verified": false}'
-    assert events[3].startswith("event: answer\\ndata: ")
+    events = response.text.strip().split("\n\n")
+    assert events[0] == 'event: status\ndata: {"stage": "drafting"}'
+    assert events[1] == 'event: token\ndata: {"text": "Evidence-backed ", "verified": false}'
+    assert events[2] == 'event: token\ndata: {"text": "answer.", "verified": false}'
+    assert events[3].startswith("event: answer\ndata: ")
     payload = json.loads(events[3].split("data: ", 1)[1])
     assert payload["answer"] == expected.answer
     assert payload["verified"] is True
-    assert events[4] == "event: done\\ndata: {}"
+    assert events[4] == "event: done\ndata: {}"
     assert captured["question"] == "Explain the evidence."
     assert captured["report_no"] == "NASA-HRP-EVIDENCE"
 
 
 def test_ask_stream_emits_error_event_for_invalid_question(monkeypatch):
-    def fail_answer_question(*args, **kwargs):
+    def fail_stream(*args, **kwargs):
         raise ValueError("Question cannot be empty.")
 
-    monkeypatch.setattr(main, "stream_answer_question", lambda *args, **kwargs: (_ for _ in ()).throw(ValueError("Question cannot be empty.")))
+    monkeypatch.setattr(main, "stream_answer_question", fail_stream)
 
     response = client.post("/ask/stream", json={"question": "   "})
 
