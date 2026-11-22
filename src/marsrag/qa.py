@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any, Sequence, TypedDict
+import logging
 
 from langgraph.graph import END, START, StateGraph
 
@@ -15,6 +16,7 @@ from marsrag.retrieval.hybrid import search_hybrid
 
 QUERY_RRF_K = 60
 MAX_RETRIEVAL_QUERIES = 5
+logger = logging.getLogger(__name__)
 
 
 class QAState(TypedDict, total=False):
@@ -126,14 +128,22 @@ def _cache_lookup_node(state: QAState) -> dict[str, Any]:
         return {}
     query = state["plan"].standalone_query
     embedding = embed_query(query)
-    cached = find_cached_answer(
-        query,
-        state["cache_key"],
-        similarity_threshold=settings.semantic_cache_similarity_threshold,
-        query_embedding=embedding,
-    )
+    try:
+        cached = find_cached_answer(
+            query,
+            state["cache_key"],
+            similarity_threshold=settings.semantic_cache_similarity_threshold,
+            query_embedding=embedding,
+        )
+    except RequestBudgetExceeded:
+        raise
+    except Exception:
+        logger.exception("semantic_cache_lookup_failed; continuing without cache")
+        return {}
     if cached is not None:
+        logger.info("semantic_cache_hit")
         return {"response": cached, "cache_embedding": embedding}
+    logger.info("semantic_cache_miss")
     return {"cache_embedding": embedding}
 
 
@@ -152,13 +162,18 @@ def _store_cache_node(state: QAState) -> dict[str, Any]:
         and response.verified
         and not response.abstained
     ):
-        store_verified_answer(
-            state["plan"].standalone_query,
-            state["cache_key"],
-            response,
-            ttl_seconds=settings.semantic_cache_ttl_seconds,
-            query_embedding=state.get("cache_embedding"),
-        )
+        try:
+            store_verified_answer(
+                state["plan"].standalone_query,
+                state["cache_key"],
+                response,
+                ttl_seconds=settings.semantic_cache_ttl_seconds,
+                query_embedding=state.get("cache_embedding"),
+            )
+        except RequestBudgetExceeded:
+            raise
+        except Exception:
+            logger.exception("semantic_cache_store_failed; returning generated answer")
     return {}
 
 
