@@ -83,7 +83,6 @@ def test_query_plan_rejects_more_than_three_search_queries():
         _plan(search_queries=["one", "two", "three", "four"])
 
 
-
 @pytest.mark.parametrize(
     "chunk_type",
     ["text", "table", "figure_caption", None],
@@ -96,3 +95,54 @@ def test_query_plan_accepts_supported_chunk_types(chunk_type):
 def test_query_plan_rejects_unsupported_chunk_type():
     with pytest.raises(ValueError):
         _plan(chunk_type="image")
+
+
+def test_analyze_query_includes_recent_history_before_latest_question():
+    expected = _plan(
+        standalone_query="What radiation risks are described in the HRP report?",
+        search_queries=["HRP report radiation risks"],
+    )
+    history = [
+        {"role": "user", "content": "What risks does the HRP report identify?"},
+        {"role": "assistant", "content": "It identifies several risks."},
+    ]
+    with (
+        patch("marsrag.query_understanding.build_chat_model") as build_model,
+        patch(
+            "marsrag.query_understanding.invoke_chat",
+            return_value=expected,
+        ) as invoke,
+    ):
+        build_model.return_value.with_structured_output.return_value = object()
+        result = analyze_query(
+            "Which of these are related to radiation?",
+            conversation_history=history,
+        )
+
+    sent_messages = invoke.call_args.args[1]
+    assert sent_messages[-3].content == history[0]["content"]
+    assert sent_messages[-2].content == history[1]["content"]
+    assert sent_messages[-1].content == (
+        "Latest user question:\nWhich of these are related to radiation?"
+    )
+    assert result.standalone_query == expected.standalone_query
+
+
+def test_analyze_query_caps_history_to_ten_messages():
+    with (
+        patch("marsrag.query_understanding.build_chat_model") as build_model,
+        patch("marsrag.query_understanding.invoke_chat", return_value=_plan()) as invoke,
+    ):
+        build_model.return_value.with_structured_output.return_value = object()
+        analyze_query(
+            "Latest question",
+            conversation_history=[
+                {"role": "user", "content": f"turn {i}"} for i in range(12)
+            ],
+        )
+
+    sent_messages = invoke.call_args.args[1]
+    history_messages = sent_messages[1:-1]
+    assert len(history_messages) == 10
+    assert history_messages[0].content == "turn 2"
+    assert history_messages[-1].content == "turn 11"
