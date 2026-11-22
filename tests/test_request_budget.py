@@ -1,4 +1,5 @@
 import pytest
+from contextvars import copy_context
 
 from marsrag.llm import (
     DemoUsageTracker,
@@ -48,3 +49,15 @@ def test_global_budget_still_applies(monkeypatch):
         tracker.reserve_request()
         with pytest.raises(RequestBudgetExceeded, match="Demo API request budget exhausted"):
             tracker.reserve_request()
+
+
+
+def test_request_budget_cleanup_tolerates_different_streaming_context():
+    manager = request_api_budget(2)
+    context_that_enters = copy_context()
+    context_that_exits = copy_context()
+
+    context_that_enters.run(manager.__enter__)
+
+    # A streaming iterator can resume in a different copied context.
+    context_that_exits.run(manager.__exit__, None, None, None)
