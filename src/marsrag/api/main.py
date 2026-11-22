@@ -8,7 +8,7 @@ from fastapi.responses import StreamingResponse
 from marsrag.db import check_database, close_pool
 from marsrag.generation import AnswerResponse
 from marsrag.models import AskRequest, HealthResponse
-from marsrag.qa import answer_question
+from marsrag.qa import answer_question, stream_answer_question
 from marsrag.settings import get_settings
 
 
@@ -64,17 +64,28 @@ def ask(request: AskRequest) -> AnswerResponse:
 
 @app.post("/ask/stream")
 def ask_stream(request: AskRequest) -> StreamingResponse:
-    """Return the completed, citation-verified answer as server-sent events."""
+    """Stream provisional draft tokens and then the final verified answer as SSE."""
 
     def event_stream() -> Iterator[str]:
         try:
-            result = _run_question(request)
-            payload = json.dumps(result.model_dump(mode="json"), ensure_ascii=False)
-            yield f"event: answer\ndata: {payload}\n\n"
-            yield "event: done\ndata: {}\n\n"
+            for event_name, data in stream_answer_question(
+                request.question,
+                report_no=request.report_no,
+                top_k=request.top_k,
+                section_path=request.section_path,
+                chunk_type=request.chunk_type,
+                use_reranker=request.use_reranker,
+                model_tier=request.model_tier,
+                conversation_history=[
+                    item.model_dump() for item in request.conversation_history
+                ],
+            ):
+                payload = json.dumps(data, ensure_ascii=False)
+                yield f"event: {event_name}\\ndata: {payload}\\n\\n"
+            yield "event: done\\ndata: {}\\n\\n"
         except ValueError as exc:
             payload = json.dumps({"detail": str(exc)}, ensure_ascii=False)
-            yield f"event: error\ndata: {payload}\n\n"
+            yield f"event: error\\ndata: {payload}\\n\\n"
 
     return StreamingResponse(
         event_stream(),
