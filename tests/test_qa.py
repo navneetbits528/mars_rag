@@ -213,3 +213,15 @@ def test_answer_question_passes_history_to_query_analysis():
         "Which relate to radiation?",
         conversation_history=history,
     )
+
+
+
+def test_answer_question_returns_abstention_when_request_budget_is_exhausted():
+    from marsrag.llm import RequestBudgetExceeded
+
+    with patch("marsrag.qa._qa_graph.invoke", side_effect=RequestBudgetExceeded("limit")):
+        result = answer_question("What does the report say?")
+
+    assert result.abstained is True
+    assert result.verified is False
+    assert result.reason == "Per-request API budget exhausted."
