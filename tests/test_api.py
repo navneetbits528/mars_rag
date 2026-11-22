@@ -78,12 +78,15 @@ def test_ask_stream_emits_answer_and_done_events(monkeypatch):
     )
     captured = {}
 
-    def fake_answer_question(question, **kwargs):
+    def fake_stream_answer_question(question, **kwargs):
         captured["question"] = question
         captured.update(kwargs)
-        return expected
+        yield "status", {"stage": "drafting"}
+        yield "token", {"text": "Evidence-backed ", "verified": False}
+        yield "token", {"text": "answer.", "verified": False}
+        yield "answer", expected.model_dump(mode="json")
 
-    monkeypatch.setattr(main, "answer_question", fake_answer_question)
+    monkeypatch.setattr(main, "stream_answer_question", fake_stream_answer_question)
 
     response = client.post(
         "/ask/stream",
@@ -107,7 +110,7 @@ def test_ask_stream_emits_error_event_for_invalid_question(monkeypatch):
     def fail_answer_question(*args, **kwargs):
         raise ValueError("Question cannot be empty.")
 
-    monkeypatch.setattr(main, "answer_question", fail_answer_question)
+    monkeypatch.setattr(main, "stream_answer_question", lambda *args, **kwargs: (_ for _ in ()).throw(ValueError("Question cannot be empty.")))
 
     response = client.post("/ask/stream", json={"question": "   "})
 
