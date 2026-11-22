@@ -159,3 +159,30 @@ def test_answer_question_rejects_empty_question(question):
         with pytest.raises(ValueError, match="Question cannot be empty"):
             answer_question(question)
     analyze.assert_not_called()
+
+
+
+def test_answer_question_applies_extracted_chunk_type_filter():
+    plan = _plan(chunk_type="table")
+    with (
+        patch("marsrag.qa.analyze_query", return_value=plan),
+        patch("marsrag.qa.search_hybrid", return_value=[]) as retrieve,
+        patch("marsrag.qa.generate_answer"),
+    ):
+        answer_question("Show me the tables about mission risks")
+
+    assert retrieve.call_count == 2
+    assert all(call.kwargs["chunk_type"] == "table" for call in retrieve.call_args_list)
+
+
+def test_explicit_chunk_type_overrides_extracted_filter():
+    plan = _plan(chunk_type="table")
+    with (
+        patch("marsrag.qa.analyze_query", return_value=plan),
+        patch("marsrag.qa.search_hybrid", return_value=[]) as retrieve,
+        patch("marsrag.qa.generate_answer"),
+    ):
+        answer_question("Show me the tables", chunk_type="text")
+
+    assert retrieve.call_count == 2
+    assert all(call.kwargs["chunk_type"] == "text" for call in retrieve.call_args_list)
