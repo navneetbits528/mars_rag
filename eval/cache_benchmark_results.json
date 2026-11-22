@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "benchmark": "postgres_semantic_cache_lookup",
+  "repeats": 30,
+  "threshold": 0.93,
+  "embedding_generation_ms": 3689.676,
+  "initial_cache_miss_ms": 252.329,
+  "cache_hit_lookup": {
+    "count": 30,
+    "min_ms": 5.725,
+    "median_ms": 48.142,
+    "mean_ms": 47.424,
+    "max_ms": 53.919
+  },
+  "repeat_cache_hit_lookup": {
+    "count": 30,
+    "min_ms": 47.004,
+    "median_ms": 48.091,
+    "mean_ms": 48.381,
+    "max_ms": 51.932
+  },
+  "notes": [
+    "Lookup timings use a precomputed embedding and therefore exclude embedding API latency.",
+    "The initial miss and subsequent hits use a unique temporary cache key.",
+    "A repeated lookup is still a database hit; the report does not simulate a miss after deleting the entry.",
+    "This benchmark does not measure end-to-end QA latency or generation cost."
+  ]
+}

@@ -1,0 +1,925 @@
+{
+  "schema_version": 1,
+  "dataset_name": "mars-cache-equivalence-v2",
+  "pair_count": 30,
+  "embedding_or_similarity_seconds": 79.3564,
+  "thresholds": {
+    "0.9": {
+      "counts": {
+        "true_positive": 5,
+        "false_positive": 1,
+        "true_negative": 20,
+        "false_negative": 4
+      },
+      "metrics": {
+        "hit_rate": 0.2,
+        "precision": 0.8333333333333334,
+        "recall": 0.5555555555555556,
+        "false_positive_rate": 0.047619047619047616,
+        "accuracy": 0.8333333333333334
+      },
+      "average_decision_latency_ms": 0.0006233332290624578,
+      "per_pair": [
+        {
+          "id": "cache-001",
+          "similarity": 0.9219864101755559,
+          "equivalent": true,
+          "predicted_hit": true,
+          "correct": true
+        },
+        {
+          "id": "cache-002",
+          "similarity": 0.48591418349481685,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-003",
+          "similarity": 0.9517653101630839,
+          "equivalent": true,
+          "predicted_hit": true,
+          "correct": true
+        },
+        {
+          "id": "cache-004",
+          "similarity": 0.905205625766203,
+          "equivalent": true,
+          "predicted_hit": true,
+          "correct": true
+        },
+        {
+          "id": "cache-005",
+          "similarity": 0.8705914423771897,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-006",
+          "similarity": 0.8200706593963981,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-007",
+          "similarity": 0.9483141453935477,
+          "equivalent": true,
+          "predicted_hit": true,
+          "correct": true
+        },
+        {
+          "id": "cache-008",
+          "similarity": 0.9289579967643015,
+          "equivalent": true,
+          "predicted_hit": true,
+          "correct": true
+        },
+        {
+          "id": "cache-009",
+          "similarity": 0.8023277042639413,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-010",
+          "similarity": 0.8841609864320178,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-011",
+          "similarity": 0.5666572614223816,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-012",
+          "similarity": 0.3013134866107774,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-013",
+          "similarity": 0.6246883327041806,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-014",
+          "similarity": 0.5100034147294771,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-015",
+          "similarity": 0.15889069314304421,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-016",
+          "similarity": 0.22940534833238932,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-017",
+          "similarity": 0.39291421652528685,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-018",
+          "similarity": 0.164469985306917,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-019",
+          "similarity": 0.9351270611299521,
+          "equivalent": false,
+          "predicted_hit": true,
+          "correct": false
+        },
+        {
+          "id": "cache-020",
+          "similarity": 0.7858198580436693,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-021",
+          "similarity": 0.7704339726171643,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-022",
+          "similarity": 0.6020531548471009,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-023",
+          "similarity": 0.4296975145059113,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-024",
+          "similarity": 0.7470485112435868,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-025",
+          "similarity": 0.4420065568530417,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-026",
+          "similarity": 0.7618745990797762,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-027",
+          "similarity": 0.597068785166814,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-028",
+          "similarity": 0.5173029032552396,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-029",
+          "similarity": 0.5622709951416561,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-030",
+          "similarity": 0.5168085731337426,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        }
+      ]
+    },
+    "0.93": {
+      "counts": {
+        "true_positive": 2,
+        "false_positive": 1,
+        "true_negative": 20,
+        "false_negative": 7
+      },
+      "metrics": {
+        "hit_rate": 0.1,
+        "precision": 0.6666666666666666,
+        "recall": 0.2222222222222222,
+        "false_positive_rate": 0.047619047619047616,
+        "accuracy": 0.7333333333333333
+      },
+      "average_decision_latency_ms": 0.0002533338071467976,
+      "per_pair": [
+        {
+          "id": "cache-001",
+          "similarity": 0.9219864101755559,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-002",
+          "similarity": 0.48591418349481685,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-003",
+          "similarity": 0.9517653101630839,
+          "equivalent": true,
+          "predicted_hit": true,
+          "correct": true
+        },
+        {
+          "id": "cache-004",
+          "similarity": 0.905205625766203,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-005",
+          "similarity": 0.8705914423771897,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-006",
+          "similarity": 0.8200706593963981,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-007",
+          "similarity": 0.9483141453935477,
+          "equivalent": true,
+          "predicted_hit": true,
+          "correct": true
+        },
+        {
+          "id": "cache-008",
+          "similarity": 0.9289579967643015,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-009",
+          "similarity": 0.8023277042639413,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-010",
+          "similarity": 0.8841609864320178,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-011",
+          "similarity": 0.5666572614223816,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-012",
+          "similarity": 0.3013134866107774,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-013",
+          "similarity": 0.6246883327041806,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-014",
+          "similarity": 0.5100034147294771,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-015",
+          "similarity": 0.15889069314304421,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-016",
+          "similarity": 0.22940534833238932,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-017",
+          "similarity": 0.39291421652528685,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-018",
+          "similarity": 0.164469985306917,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-019",
+          "similarity": 0.9351270611299521,
+          "equivalent": false,
+          "predicted_hit": true,
+          "correct": false
+        },
+        {
+          "id": "cache-020",
+          "similarity": 0.7858198580436693,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-021",
+          "similarity": 0.7704339726171643,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-022",
+          "similarity": 0.6020531548471009,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-023",
+          "similarity": 0.4296975145059113,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-024",
+          "similarity": 0.7470485112435868,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-025",
+          "similarity": 0.4420065568530417,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-026",
+          "similarity": 0.7618745990797762,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-027",
+          "similarity": 0.597068785166814,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-028",
+          "similarity": 0.5173029032552396,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-029",
+          "similarity": 0.5622709951416561,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-030",
+          "similarity": 0.5168085731337426,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        }
+      ]
+    },
+    "0.95": {
+      "counts": {
+        "true_positive": 1,
+        "false_positive": 0,
+        "true_negative": 21,
+        "false_negative": 8
+      },
+      "metrics": {
+        "hit_rate": 0.03333333333333333,
+        "precision": 1.0,
+        "recall": 0.1111111111111111,
+        "false_positive_rate": 0.0,
+        "accuracy": 0.7333333333333333
+      },
+      "average_decision_latency_ms": 0.00021333350256706277,
+      "per_pair": [
+        {
+          "id": "cache-001",
+          "similarity": 0.9219864101755559,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-002",
+          "similarity": 0.48591418349481685,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-003",
+          "similarity": 0.9517653101630839,
+          "equivalent": true,
+          "predicted_hit": true,
+          "correct": true
+        },
+        {
+          "id": "cache-004",
+          "similarity": 0.905205625766203,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-005",
+          "similarity": 0.8705914423771897,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-006",
+          "similarity": 0.8200706593963981,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-007",
+          "similarity": 0.9483141453935477,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-008",
+          "similarity": 0.9289579967643015,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-009",
+          "similarity": 0.8023277042639413,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-010",
+          "similarity": 0.8841609864320178,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-011",
+          "similarity": 0.5666572614223816,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-012",
+          "similarity": 0.3013134866107774,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-013",
+          "similarity": 0.6246883327041806,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-014",
+          "similarity": 0.5100034147294771,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-015",
+          "similarity": 0.15889069314304421,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-016",
+          "similarity": 0.22940534833238932,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-017",
+          "similarity": 0.39291421652528685,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-018",
+          "similarity": 0.164469985306917,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-019",
+          "similarity": 0.9351270611299521,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-020",
+          "similarity": 0.7858198580436693,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-021",
+          "similarity": 0.7704339726171643,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-022",
+          "similarity": 0.6020531548471009,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-023",
+          "similarity": 0.4296975145059113,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-024",
+          "similarity": 0.7470485112435868,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-025",
+          "similarity": 0.4420065568530417,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-026",
+          "similarity": 0.7618745990797762,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-027",
+          "similarity": 0.597068785166814,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-028",
+          "similarity": 0.5173029032552396,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-029",
+          "similarity": 0.5622709951416561,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-030",
+          "similarity": 0.5168085731337426,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        }
+      ]
+    },
+    "0.97": {
+      "counts": {
+        "true_positive": 0,
+        "false_positive": 0,
+        "true_negative": 21,
+        "false_negative": 9
+      },
+      "metrics": {
+        "hit_rate": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "false_positive_rate": 0.0,
+        "accuracy": 0.7
+      },
+      "average_decision_latency_ms": 0.00024333276087418199,
+      "per_pair": [
+        {
+          "id": "cache-001",
+          "similarity": 0.9219864101755559,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-002",
+          "similarity": 0.48591418349481685,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-003",
+          "similarity": 0.9517653101630839,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-004",
+          "similarity": 0.905205625766203,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-005",
+          "similarity": 0.8705914423771897,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-006",
+          "similarity": 0.8200706593963981,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-007",
+          "similarity": 0.9483141453935477,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-008",
+          "similarity": 0.9289579967643015,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-009",
+          "similarity": 0.8023277042639413,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-010",
+          "similarity": 0.8841609864320178,
+          "equivalent": true,
+          "predicted_hit": false,
+          "correct": false
+        },
+        {
+          "id": "cache-011",
+          "similarity": 0.5666572614223816,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-012",
+          "similarity": 0.3013134866107774,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-013",
+          "similarity": 0.6246883327041806,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-014",
+          "similarity": 0.5100034147294771,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-015",
+          "similarity": 0.15889069314304421,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-016",
+          "similarity": 0.22940534833238932,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-017",
+          "similarity": 0.39291421652528685,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-018",
+          "similarity": 0.164469985306917,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-019",
+          "similarity": 0.9351270611299521,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-020",
+          "similarity": 0.7858198580436693,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-021",
+          "similarity": 0.7704339726171643,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-022",
+          "similarity": 0.6020531548471009,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-023",
+          "similarity": 0.4296975145059113,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-024",
+          "similarity": 0.7470485112435868,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-025",
+          "similarity": 0.4420065568530417,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-026",
+          "similarity": 0.7618745990797762,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-027",
+          "similarity": 0.597068785166814,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-028",
+          "similarity": 0.5173029032552396,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-029",
+          "similarity": 0.5622709951416561,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        },
+        {
+          "id": "cache-030",
+          "similarity": 0.5168085731337426,
+          "equivalent": false,
+          "predicted_hit": false,
+          "correct": true
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "This evaluates semantic-match decisions, not end-to-end PostgreSQL cache lookup latency.",
+    "Pair labels must be reviewed by a person; similarity is not proof of answer equivalence."
+  ],
+  "unique_questions_embedded": 55
+}

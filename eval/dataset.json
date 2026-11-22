@@ -1,0 +1,367 @@
+{
+  "schema_version": 1,
+  "dataset_name": "mars-hrp-evidence-v1",
+  "corpus_report_no": "NASA-HRP-EVIDENCE",
+  "description": "Curated evaluation questions grounded in NASA's Risk of Performance Decrement and Crew Illness Due to Inadequate Food and Nutrition evidence report. Answerable examples are linked to exact current chunk IDs exported from the ingested baseline corpus; unanswerable examples intentionally have no expected answer or evidence.",
+  "examples": [
+    {
+      "id": "hrp-001",
+      "question": "What three broad criteria must a food system demonstrate before it is considered for spaceflight?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "factual",
+      "answerable": true,
+      "expected_answer": "It must demonstrate (1) nutritional stability, continued acceptability, reliability, and safety; (2) the ability to maintain or promote astronaut health and performance in realistic use cases; and (3) compatibility with available mission resources.",
+      "relevant_chunk_ids": [
+        "3a7c6ccac4508dbea7843aa8dce19c35a26cbb936a24a62b2a02b7d983402e2e"
+      ],
+      "expected_pages": [
+        8
+      ]
+    },
+    {
+      "id": "hrp-002",
+      "question": "Why does the report say a Mars mission may require food to have at least a five-year shelf life?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "factual",
+      "answerable": true,
+      "expected_answer": "A Mars mission may last about three years, and food may be prepositioned before crew launch and consumed near the end of the mission. The report therefore states that food needs at least a five-year shelf life from production through mission end.",
+      "relevant_chunk_ids": [
+        "e35d86340def27305af5852947dabab0a3b84aa4e449c4b8f3ff8a6d70520acc"
+      ],
+      "expected_pages": [
+        15
+      ]
+    },
+    {
+      "id": "hrp-003",
+      "question": "What is the ISS standard-menu and preference-food split described in the report?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "factual",
+      "answerable": true,
+      "expected_answer": "About 75% of the ISS food system is a shared standard menu selected pantry-style at a predetermined usage rate; the other 25% consists of crew preference items and limited specialty or short-shelf-life foods enabled by resupply.",
+      "relevant_chunk_ids": [
+        "6e4f3730f12e38e1dc56a0138ffd2fcd1e4bd974e196abc64083c27f65715349"
+      ],
+      "expected_pages": [
+        13
+      ]
+    },
+    {
+      "id": "hrp-004",
+      "question": "How long after rehydrating or opening does the crew have to consume space food before discarding the remainder?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "factual",
+      "answerable": true,
+      "expected_answer": "Crew are trained to discard food not consumed within two hours after rehydrating freeze-dried food or opening retort or irradiated food; the time limit decreases at higher temperatures.",
+      "relevant_chunk_ids": [
+        "aa39e4f06b6f6212d3eadb75d8c52c40f256ce362996076778eab03bf60d80e4"
+      ],
+      "expected_pages": [
+        10
+      ]
+    },
+    {
+      "id": "hrp-005",
+      "question": "What average daily caloric intake was reported for Mercury, Gemini, and Apollo missions, and how did it compare with the amount needed to maintain body weight?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "factual",
+      "answerable": true,
+      "expected_answer": "Average intake was about 1,880 ± 415 kcal/day, consistently below the approximately 2,870 kcal/day estimated to maintain body weight.",
+      "relevant_chunk_ids": [
+        "54c201401af9b60a30b4799117206c2482df19127a012f9990ee985174a6ca1e"
+      ],
+      "expected_pages": [
+        16
+      ]
+    },
+    {
+      "id": "hrp-006",
+      "question": "What nutrient deficiency was attributed to arrhythmias in Apollo 15 astronauts, and what mitigation was used later?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "factual",
+      "answerable": true,
+      "expected_answer": "The arrhythmias were attributed to potassium deficiency in the space food system; later missions mitigated this with potassium supplementation.",
+      "relevant_chunk_ids": [
+        "8768cc486f67364325f1df425c04545cfe8e13d0cbaf71a50deac2989ec6767f"
+      ],
+      "expected_pages": [
+        16
+      ]
+    },
+    {
+      "id": "hrp-007",
+      "question": "How many raw products or ingredients failed each of the three microbiological specifications in JSC testing from 2019 to 2023?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "factual",
+      "answerable": true,
+      "expected_answer": "Of 1,407 products or ingredients tested, 92 failed aerobic microbiological specifications, 38 failed Enterobacteriaceae specifications, and 88 failed yeast and mold specifications.",
+      "relevant_chunk_ids": [
+        "ab53fb382bcd330d27376b57afab6865273f7894dd15297f710d92c969ddb856"
+      ],
+      "expected_pages": [
+        18
+      ]
+    },
+    {
+      "id": "hrp-008",
+      "question": "For canned fruits and vegetables stored for two years, what maximum losses of ascorbic acid, riboflavin, and thiamin were reported at 27°C versus 10°C?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "factual",
+      "answerable": true,
+      "expected_answer": "At 27°C, losses were as high as 58%; at 10°C, maximum losses were 38%.",
+      "relevant_chunk_ids": [
+        "25703fdbaafa31bc1ce1568f5de90649d2a7669f5a0c8439a05effa6b4b41c1b"
+      ],
+      "expected_pages": [
+        19
+      ]
+    },
+    {
+      "id": "hrp-009",
+      "question": "Which nutrients were identified as potentially insufficient or degrading after three years of room-temperature storage of the evaluated space foods?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "factual",
+      "answerable": true,
+      "expected_answer": "The report says vitamin D, vitamin K, calcium, and potassium may not be available at sufficient levels; vitamins B1 and C may degrade to inadequate levels, with other vitamins degrading on a food-specific basis.",
+      "relevant_chunk_ids": [
+        "2f0461033b63d4df59b38cb8c6f0c1d810892921c28eac5a33fd42c3e3801d6c"
+      ],
+      "expected_pages": [
+        20
+      ]
+    },
+    {
+      "id": "hrp-010",
+      "question": "Which nutrients were evaluated for radiation effects at the NASA Space Radiation Laboratory, and what was observed over the following year?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "factual",
+      "answerable": true,
+      "expected_answer": "Thiamin, vitamin E, and unsaturated fats were evaluated. No differences were detected over the year after radiation treatment compared with untreated controls.",
+      "relevant_chunk_ids": [
+        "babd11445aa8e197f45d6f3681885e20ff8c69b64a18d0b4626b3ccb14a5cad2"
+      ],
+      "expected_pages": [
+        20
+      ]
+    },
+    {
+      "id": "hrp-011",
+      "question": "According to Table 1, what Q10 ranges are listed for thermally processed, dehydrated, and frozen foods?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "table_lookup",
+      "answerable": true,
+      "expected_answer": "Thermally processed: 1–4; dehydrated: 2–10; frozen: 3–40.",
+      "relevant_chunk_ids": [
+        "e199668b3d9d2992b8e8757e1bafc6e9843bba450d8021ab7bb1fe607a7e02a3"
+      ],
+      "expected_pages": [
+        21
+      ]
+    },
+    {
+      "id": "hrp-012",
+      "question": "How is Q10 defined in the report?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "factual",
+      "answerable": true,
+      "expected_answer": "Q10 is the ratio of shelf life at temperature T°C to shelf life at temperature (T°C + 10); it measures how the rate changes for each 10°C temperature change.",
+      "relevant_chunk_ids": [
+        "dc2298e0efec6d25daa176ea1571394d67fa97bd181b5e1cb3b2b035ccfd40cc"
+      ],
+      "expected_pages": [
+        21
+      ]
+    },
+    {
+      "id": "hrp-013",
+      "question": "Why does the report caution against assuming one fixed Q10 value for an entire food category?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "factual",
+      "answerable": true,
+      "expected_answer": "There is no definitive Q10 for a given food category. Each food type must be tested, and a single food may have several Q10 values because different reactions contribute to degradation.",
+      "relevant_chunk_ids": [
+        "f03b6a55f4f22f11ce72bbeb1b40c84df920db60ef7ac907d800578c7fa73bc8"
+      ],
+      "expected_pages": [
+        21
+      ]
+    },
+    {
+      "id": "hrp-014",
+      "question": "What happened to the acceptability of foods normally served hot when they were consumed at room temperature in the 2006 JSC study?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "factual",
+      "answerable": true,
+      "expected_answer": "The foods lost about 20% of their acceptability, and about 17% of the items scored below 6 on a 9-point hedonic scale.",
+      "relevant_chunk_ids": [
+        "3f2dba860d0512b8801307ca6a5f2f132aadff5a533f8350cd46e8caf5a41ced"
+      ],
+      "expected_pages": [
+        24
+      ]
+    },
+    {
+      "id": "hrp-015",
+      "question": "What food-related constraints are highlighted for future Moon-to-Mars missions compared with the ISS?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_answer": "Future missions face greater mass and volume, power, food-preparation, and time restrictions; they also anticipate more EVA activity and higher caloric needs, at least five years of food shelf life, and no feasible resupply.",
+      "relevant_chunk_ids": [
+        "e35d86340def27305af5852947dabab0a3b84aa4e449c4b8f3ff8a6d70520acc",
+        "636c7c196860c6b08628afcedf5fc5fff7ae5e7d0fb625229791ad8fd5f3e154"
+      ],
+      "expected_pages": [
+        15,
+        32
+      ]
+    },
+    {
+      "id": "hrp-016",
+      "question": "How does the report connect distance from Earth to the primary food-and-nutrition risk?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "multi_hop",
+      "answerable": true,
+      "expected_answer": "Distance from Earth increases the inability to resupply, while limited food shelf life constrains the available provisions. Together these create the primary hazard identified for the Food and Nutrition Risk.",
+      "relevant_chunk_ids": [
+        "5187c6e2b4a9b8bbce067af2fc3d0f0c991f62a459992a1b5698436fe127a84c",
+        "636c7c196860c6b08628afcedf5fc5fff7ae5e7d0fb625229791ad8fd5f3e154"
+      ],
+      "expected_pages": [
+        32
+      ]
+    },
+    {
+      "id": "hrp-017",
+      "question": "What is the difference between the Q10 ranges for thermally processed and frozen foods in Table 1?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "comparison",
+      "answerable": true,
+      "expected_answer": "Thermally processed foods have a Q10 range of 1–4, whereas frozen foods have a range of 3–40; the frozen range is substantially higher and wider.",
+      "relevant_chunk_ids": [
+        "e199668b3d9d2992b8e8757e1bafc6e9843bba450d8021ab7bb1fe607a7e02a3"
+      ],
+      "expected_pages": [
+        21
+      ]
+    },
+    {
+      "id": "hrp-018",
+      "question": "Compare the reported nutrient losses in canned fruits and vegetables stored at 27°C and 10°C for two years.",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "comparison",
+      "answerable": true,
+      "expected_answer": "The maximum losses of ascorbic acid, riboflavin, and thiamin were 58% at 27°C and 38% at 10°C, indicating lower losses at the cooler storage temperature in the reported study.",
+      "relevant_chunk_ids": [
+        "25703fdbaafa31bc1ce1568f5de90649d2a7669f5a0c8439a05effa6b4b41c1b"
+      ],
+      "expected_pages": [
+        19
+      ]
+    },
+    {
+      "id": "hrp-019",
+      "question": "How do the ISS food system's resupply-supported preference foods differ from the food strategy anticipated for exploration missions?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "comparison",
+      "answerable": true,
+      "expected_answer": "On the ISS, about one quarter of provisions are preference or limited specialty foods, supported by regular resupply. For exploration, preference items may not be supportable because prepositioning timelines can exceed shelf life and resupply is not expected; the report discusses a standard food supply without individual preference.",
+      "relevant_chunk_ids": [
+        "6e4f3730f12e38e1dc56a0138ffd2fcd1e4bd974e196abc64083c27f65715349",
+        "e35d86340def27305af5852947dabab0a3b84aa4e449c4b8f3ff8a6d70520acc",
+        "e9d9493d1c7d8e4e405df7c0051cb79bf09ec083d213bbbe5c53f0ef70653d3b"
+      ],
+      "expected_pages": [
+        13,
+        15
+      ]
+    },
+    {
+      "id": "hrp-020",
+      "question": "What operational lesson came from the 10-day vegetarian diet chamber test regarding preparation workload and food waste?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "factual",
+      "answerable": true,
+      "expected_answer": "General preparation and cleaning required 4.6 crew-hours per day, and waste—mostly leftovers—ranged from 20% to 80%. The report says this demonstrated a need for automation, a diverse menu, and better recipe scaling to crew size.",
+      "relevant_chunk_ids": [
+        "178b68daa9c8568933f2f15dbbb56de0352dd5b5fec8c5dd4c36049a8dc79011"
+      ],
+      "expected_pages": [
+        30
+      ]
+    },
+    {
+      "id": "hrp-021",
+      "question": "What packaging change reduced ISS food upmass by approximately 15–17%?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "factual",
+      "answerable": true,
+      "expected_answer": "Replacing rigid collapsible food containers with flexible, large overwraps reduced upmass by approximately 15–17%.",
+      "relevant_chunk_ids": [
+        "3723d3a2b7628982a260dc6f641bdb9d70450bc799690392ca7208b4c4279893"
+      ],
+      "expected_pages": [
+        29
+      ]
+    },
+    {
+      "id": "hrp-022",
+      "question": "What does the report identify as the main consequence if food is unacceptable even when it contains the required nutrition?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "factual",
+      "answerable": true,
+      "expected_answer": "Crew may not consume enough of it to obtain adequate nutrition; reduced acceptability can therefore lead to underconsumption and nutritional compromise.",
+      "relevant_chunk_ids": [
+        "38cc5e856b0003a8bc5b62276526372cfbbccc33e423ab74eac6080fb9e13534",
+        "36629ae8c55504b71aa1b8c599c55a183324c385850176ffc407f3f1707c61d5"
+      ],
+      "expected_pages": [
+        33
+      ]
+    },
+    {
+      "id": "hrp-023",
+      "question": "What are the stated objectives of knowledge gap FN-102?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "factual",
+      "answerable": true,
+      "expected_answer": "FN-102 aims to determine the nutrient content, safety, and acceptability of the spaceflight food system for each Design Reference Mission and its associated vehicle constraints.",
+      "relevant_chunk_ids": [
+        "cfad646bf9b65a8adbafb6e0912059aa1f8330809741d646e43c3c22a9aadd70"
+      ],
+      "expected_pages": [
+        35
+      ]
+    },
+    {
+      "id": "hrp-024",
+      "question": "Does the report provide a definitive probability (as a percentage) that a crew member will develop foodborne illness on a Mars mission?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "unanswerable",
+      "answerable": false,
+      "expected_answer": null,
+      "relevant_chunk_ids": [],
+      "expected_pages": []
+    },
+    {
+      "id": "hrp-025",
+      "question": "Does the report specify a single exact daily iron requirement in milligrams for every Mars crew member?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "unanswerable",
+      "answerable": false,
+      "expected_answer": null,
+      "relevant_chunk_ids": [],
+      "expected_pages": []
+    },
+    {
+      "id": "hrp-026",
+      "question": "Does the report state the exact number of astronauts assigned to every future Mars mission scenario?",
+      "report_no": "NASA-HRP-EVIDENCE",
+      "category": "unanswerable",
+      "answerable": false,
+      "expected_answer": null,
+      "relevant_chunk_ids": [],
+      "expected_pages": []
+    }
+  ]
+}

@@ -1,0 +1,187 @@
+﻿{
+  "schema_version": 1,
+  "dataset_name": "mars-cache-equivalence-v2",
+  "description": "30 human-reviewed question pairs grounded in NASA-HRP-EVIDENCE. True means reusing the cached answer is safe; false means it is not.",
+  "pairs": [
+    {
+      "id": "cache-001",
+      "cached_question": "How long is the transit duration?",
+      "candidate_question": "What is the duration of the transit?",
+      "equivalent": true
+    },
+    {
+      "id": "cache-002",
+      "cached_question": "How long is the transit duration?",
+      "candidate_question": "How long is the surface stay?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-003",
+      "cached_question": "What three broad criteria must a food system demonstrate before it is considered for spaceflight?",
+      "candidate_question": "Which three main criteria does a food system need to meet for spaceflight consideration?",
+      "equivalent": true
+    },
+    {
+      "id": "cache-004",
+      "cached_question": "Why does a Mars mission require food to have at least a five-year shelf life?",
+      "candidate_question": "What is the reason for requiring a minimum five-year shelf life for Mars mission food?",
+      "equivalent": true
+    },
+    {
+      "id": "cache-005",
+      "cached_question": "What is the ISS standard-menu and preference-food split?",
+      "candidate_question": "How is the ISS food menu divided between standard menu items and preference foods?",
+      "equivalent": true
+    },
+    {
+      "id": "cache-006",
+      "cached_question": "How long after rehydrating or opening must space food be consumed?",
+      "candidate_question": "What is the allowed consumption period after space food is opened or rehydrated?",
+      "equivalent": true
+    },
+    {
+      "id": "cache-007",
+      "cached_question": "What nutrient deficiency was associated with arrhythmias in Apollo 15 astronauts?",
+      "candidate_question": "Which nutrient deficiency was linked to heart arrhythmias in the Apollo 15 crew?",
+      "equivalent": true
+    },
+    {
+      "id": "cache-008",
+      "cached_question": "How is Q10 defined in the report?",
+      "candidate_question": "What does Q10 mean according to the report?",
+      "equivalent": true
+    },
+    {
+      "id": "cache-009",
+      "cached_question": "Why should one fixed Q10 value not be assumed for an entire food category?",
+      "candidate_question": "Why does the report warn against using a single Q10 value for all foods in a category?",
+      "equivalent": true
+    },
+    {
+      "id": "cache-010",
+      "cached_question": "What packaging change reduced ISS food upmass by approximately 15–17%?",
+      "candidate_question": "Which packaging modification lowered the mass of ISS food by around 15 to 17 percent?",
+      "equivalent": true
+    },
+    {
+      "id": "cache-011",
+      "cached_question": "What is the ISS food preference-food split?",
+      "candidate_question": "What food strategy is anticipated for future exploration missions?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-012",
+      "cached_question": "Why might Mars mission food need a five-year shelf life?",
+      "candidate_question": "What happened to food acceptability when normally hot foods were served at room temperature?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-013",
+      "cached_question": "What is the definition of Q10?",
+      "candidate_question": "What Q10 ranges are listed for different food processing categories in Table 1?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-014",
+      "cached_question": "What nutrient deficiency was associated with Apollo 15 arrhythmias?",
+      "candidate_question": "Which nutrients were evaluated for radiation effects at the NASA Space Radiation Laboratory?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-015",
+      "cached_question": "What are the objectives of knowledge gap FN-102?",
+      "candidate_question": "What is the main consequence of food being unacceptable despite containing required nutrition?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-016",
+      "cached_question": "What was the average daily caloric intake during Mercury, Gemini, and Apollo missions?",
+      "candidate_question": "What nutrient losses occurred in canned fruits and vegetables during storage?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-017",
+      "cached_question": "What food-related constraints are highlighted for future Moon-to-Mars missions?",
+      "candidate_question": "What was the operational lesson from the vegetarian diet chamber test?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-018",
+      "cached_question": "What is the main food and nutrition risk associated with distance from Earth?",
+      "candidate_question": "What are the microbiological testing results for raw products and ingredients?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-019",
+      "cached_question": "What maximum nutrient losses were reported after two years at 27°C?",
+      "candidate_question": "What maximum nutrient losses were reported after two years at 10°C?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-020",
+      "cached_question": "What is the Q10 range for thermally processed foods?",
+      "candidate_question": "What is the Q10 range for frozen foods?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-021",
+      "cached_question": "What is the Q10 range for dehydrated foods?",
+      "candidate_question": "What is the Q10 range for thermally processed foods?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-022",
+      "cached_question": "What was the ISS standard-menu and preference-food split?",
+      "candidate_question": "How does the exploration mission food strategy differ from the ISS strategy?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-023",
+      "cached_question": "How long must food remain shelf-stable for a Mars mission?",
+      "candidate_question": "How long after opening or rehydrating must food be consumed?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-024",
+      "cached_question": "What food constraints apply to future Moon-to-Mars missions?",
+      "candidate_question": "What food constraints apply to the ISS standard menu?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-025",
+      "cached_question": "What nutrient deficiency was associated with Apollo 15 arrhythmias?",
+      "candidate_question": "What nutrient deficiencies or degradation concerns were identified after three years of room-temperature storage?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-026",
+      "cached_question": "What was the average daily caloric intake during Mercury, Gemini, and Apollo missions?",
+      "candidate_question": "What caloric intake was required to maintain body weight during those missions?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-027",
+      "cached_question": "What was the food system's standard-menu and preference-food split on the ISS?",
+      "candidate_question": "What percentage of ISS food upmass was reduced by the packaging change?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-028",
+      "cached_question": "What were the reported Q10 ranges for thermally processed, dehydrated, and frozen foods?",
+      "candidate_question": "How is Q10 defined in the report?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-029",
+      "cached_question": "What did the report say about food safety and microbiological specifications?",
+      "candidate_question": "What did the report say about food acceptability when served at room temperature?",
+      "equivalent": false
+    },
+    {
+      "id": "cache-030",
+      "cached_question": "What is the primary food-and-nutrition risk caused by distance from Earth?",
+      "candidate_question": "What are the three broad criteria for considering a food system for spaceflight?",
+      "equivalent": false
+    }
+  ]
+}
