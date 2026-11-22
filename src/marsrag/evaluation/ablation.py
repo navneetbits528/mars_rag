@@ -15,6 +15,7 @@ from marsrag.retrieval.keyword import search_keyword
 
 
 RetrievalFn = Callable[[str, str], list[dict[str, Any]]]
+MAX_EXPANSION_QUERIES = 2
 
 
 def _merge_ranked_lists(
@@ -67,7 +68,7 @@ def build_ablation_methods(*, top_k: int = 5) -> dict[str, RetrievalFn]:
             query.strip()
             for query in [plan.standalone_query, *plan.search_queries]
             if query and query.strip()
-        ))[:4]
+        ))[:MAX_EXPANSION_QUERIES]
         result_sets = [
             search_hybrid(
                 query,
@@ -87,7 +88,7 @@ def build_ablation_methods(*, top_k: int = 5) -> dict[str, RetrievalFn]:
             query.strip()
             for query in [plan.standalone_query, *plan.search_queries]
             if query and query.strip()
-        ))[:4]
+        ))[:MAX_EXPANSION_QUERIES]
         result_sets = [
             search_hybrid(
                 query,
