@@ -91,6 +91,7 @@ def test_multi_hop_query_uses_decomposed_sub_questions():
                 [{"chunk_id": "b", "content": "Outcomes"}],
                 [{"chunk_id": "a", "content": "Milestones"}],
                 [{"chunk_id": "c", "content": "Extra"}],
+                [{"chunk_id": "d", "content": "Search variant"}],
             ],
         ) as retrieve,
         patch("marsrag.qa.generate_answer") as generate,
@@ -152,7 +153,7 @@ def test_merge_query_results_deduplicates_and_ranks():
     assert len({item["chunk_id"] for item in merged}) == 3
 
 
-@pytest.mark.parametrize("question", ["", "   ", "\\n"])
+@pytest.mark.parametrize("question", ["", "   ", "\n"])
 def test_answer_question_rejects_empty_question(question):
     with patch("marsrag.qa.analyze_query") as analyze:
         with pytest.raises(ValueError, match="Question cannot be empty"):
