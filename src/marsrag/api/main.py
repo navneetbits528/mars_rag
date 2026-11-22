@@ -81,11 +81,11 @@ def ask_stream(request: AskRequest) -> StreamingResponse:
                 ],
             ):
                 payload = json.dumps(data, ensure_ascii=False)
-                yield f"event: {event_name}\\ndata: {payload}\\n\\n"
-            yield "event: done\\ndata: {}\\n\\n"
+                yield f"event: {event_name}\ndata: {payload}\n\n"
+            yield "event: done\ndata: {}\n\n"
         except ValueError as exc:
             payload = json.dumps({"detail": str(exc)}, ensure_ascii=False)
-            yield f"event: error\\ndata: {payload}\\n\\n"
+            yield f"event: error\ndata: {payload}\n\n"
 
     return StreamingResponse(
         event_stream(),
