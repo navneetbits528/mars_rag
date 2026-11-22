@@ -8,6 +8,8 @@ from marsrag.filter_resolution import ResolvedFilters, resolve_filters
 from marsrag.generation import AnswerResponse, generate_answer
 from marsrag.llm import RequestBudgetExceeded, request_api_budget
 from marsrag.settings import get_settings
+from marsrag.llm import embed_query
+from marsrag.semantic_cache import build_cache_key, find_cached_answer, store_verified_answer
 from marsrag.query_understanding import QueryPlan, analyze_query
 from marsrag.retrieval.hybrid import search_hybrid
 
@@ -29,6 +31,9 @@ class QAState(TypedDict, total=False):
     result_sets: list[list[dict[str, Any]]]
     sources: list[dict[str, Any]]
     response: AnswerResponse
+    cache_key: str
+    cache_embedding: list[float]
+    cacheable: bool
 
 
 def _merge_query_results(
@@ -90,7 +95,23 @@ def _resolve_filters_node(state: QAState) -> dict[str, Any]:
         chunk_type=state.get("chunk_type"),
         inferred_chunk_type=plan.chunk_type,
     )
-    return {"filters": filters}
+    settings = get_settings()
+    cache_key = build_cache_key(
+        report_no=filters.report_no,
+        section_path=filters.section_path,
+        chunk_type=filters.chunk_type,
+        top_k=state["top_k"],
+        use_reranker=state["use_reranker"],
+        model_tier=state["model_tier"],
+        prompt_version=settings.prompt_version,
+        corpus_version=settings.corpus_version,
+        query_route=plan.route,
+    )
+    return {
+        "filters": filters,
+        "cache_key": cache_key,
+        "cacheable": not bool(state.get("conversation_history")),
+    }
 
 
 def _route_after_analysis(state: QAState) -> str:
@@ -99,8 +120,46 @@ def _route_after_analysis(state: QAState) -> str:
     return "resolve_filters"
 
 
-def _route_after_filters(state: QAState) -> str:
+def _cache_lookup_node(state: QAState) -> dict[str, Any]:
+    settings = get_settings()
+    if not settings.semantic_cache_enabled or not state.get("cacheable", False):
+        return {}
+    query = state["plan"].standalone_query
+    embedding = embed_query(query)
+    cached = find_cached_answer(
+        query,
+        state["cache_key"],
+        similarity_threshold=settings.semantic_cache_similarity_threshold,
+        query_embedding=embedding,
+    )
+    if cached is not None:
+        return {"response": cached, "cache_embedding": embedding}
+    return {"cache_embedding": embedding}
+
+
+def _route_after_cache(state: QAState) -> str:
+    if "response" in state:
+        return "finish"
     return "fast_retrieval" if state["plan"].route == "simple" else "slow_retrieval"
+
+
+def _store_cache_node(state: QAState) -> dict[str, Any]:
+    settings = get_settings()
+    response = state["response"]
+    if (
+        settings.semantic_cache_enabled
+        and state.get("cacheable", False)
+        and response.verified
+        and not response.abstained
+    ):
+        store_verified_answer(
+            state["plan"].standalone_query,
+            state["cache_key"],
+            response,
+            ttl_seconds=settings.semantic_cache_ttl_seconds,
+            query_embedding=state.get("cache_embedding"),
+        )
+    return {}
 
 
 def _retrieve(state: QAState, queries: list[str]) -> dict[str, Any]:
@@ -153,10 +212,12 @@ def build_qa_graph():
     graph = StateGraph(QAState)
     graph.add_node("analyze", _analyze_node)
     graph.add_node("resolve_filters", _resolve_filters_node)
+    graph.add_node("cache_lookup", _cache_lookup_node)
     graph.add_node("fast_retrieval", _fast_retrieval_node)
     graph.add_node("slow_retrieval", _slow_retrieval_node)
     graph.add_node("aggregate", _aggregate_node)
     graph.add_node("generate", _generate_node)
+    graph.add_node("store_cache", _store_cache_node)
 
     graph.add_edge(START, "analyze")
     graph.add_conditional_edges(
@@ -164,15 +225,21 @@ def build_qa_graph():
         _route_after_analysis,
         {"finish": END, "resolve_filters": "resolve_filters"},
     )
+    graph.add_edge("resolve_filters", "cache_lookup")
     graph.add_conditional_edges(
-        "resolve_filters",
-        _route_after_filters,
-        {"fast_retrieval": "fast_retrieval", "slow_retrieval": "slow_retrieval"},
+        "cache_lookup",
+        _route_after_cache,
+        {
+            "finish": END,
+            "fast_retrieval": "fast_retrieval",
+            "slow_retrieval": "slow_retrieval",
+        },
     )
     graph.add_edge("fast_retrieval", "aggregate")
     graph.add_edge("slow_retrieval", "aggregate")
     graph.add_edge("aggregate", "generate")
-    graph.add_edge("generate", END)
+    graph.add_edge("generate", "store_cache")
+    graph.add_edge("store_cache", END)
     return graph.compile()
 
 
