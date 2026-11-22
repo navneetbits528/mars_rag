@@ -237,3 +237,83 @@ def test_answer_question_returns_abstention_when_request_budget_is_exhausted():
     assert result.abstained is True
     assert result.verified is False
     assert result.reason == "Configured API budget exhausted."
+
+
+def _enable_cache(monkeypatch):
+    from types import SimpleNamespace
+
+    monkeypatch.setattr(
+        "marsrag.qa.get_settings",
+        lambda: SimpleNamespace(
+            max_requests_per_qa=12,
+            semantic_cache_enabled=True,
+            semantic_cache_similarity_threshold=0.93,
+            semantic_cache_ttl_seconds=3600,
+            prompt_version="v1",
+            corpus_version=1,
+        ),
+    )
+
+
+def test_semantic_cache_hit_skips_retrieval_and_generation(monkeypatch):
+    _enable_cache(monkeypatch)
+    cached = AnswerResponse(
+        answer="Previously verified answer",
+        abstained=False,
+        verified=True,
+        citations=[],
+    )
+    with (
+        patch("marsrag.qa.embed_query", return_value=[0.1, 0.2]) as embed,
+        patch("marsrag.qa.find_cached_answer", return_value=cached) as lookup,
+        patch("marsrag.qa.search_hybrid") as retrieve,
+        patch("marsrag.qa.generate_answer") as generate,
+    ):
+        result = answer_question("What does the report say?")
+
+    assert result is cached
+    embed.assert_called_once_with("What does the report say?")
+    lookup.assert_called_once()
+    retrieve.assert_not_called()
+    generate.assert_not_called()
+
+
+def test_semantic_cache_miss_stores_only_verified_generated_answer(monkeypatch):
+    _enable_cache(monkeypatch)
+    expected = AnswerResponse(
+        answer="New verified answer",
+        abstained=False,
+        verified=True,
+        citations=[],
+    )
+    with (
+        patch("marsrag.qa.embed_query", return_value=[0.1, 0.2]),
+        patch("marsrag.qa.find_cached_answer", return_value=None),
+        patch("marsrag.qa.search_hybrid", return_value=[]),
+        patch("marsrag.qa.generate_answer", return_value=expected),
+        patch("marsrag.qa.store_verified_answer", return_value=True) as store,
+    ):
+        result = answer_question("What does the report say?")
+
+    assert result is expected
+    store.assert_called_once()
+    assert store.call_args.args[0] == "What does the report say?"
+    assert store.call_args.args[2] is expected
+    assert store.call_args.kwargs["ttl_seconds"] == 3600
+    assert store.call_args.kwargs["query_embedding"] == [0.1, 0.2]
+
+
+def test_semantic_cache_is_bypassed_for_conversation_history(monkeypatch):
+    _enable_cache(monkeypatch)
+    history = [{"role": "user", "content": "Earlier question"}]
+    with (
+        patch("marsrag.qa.embed_query") as embed,
+        patch("marsrag.qa.find_cached_answer") as lookup,
+        patch("marsrag.qa.search_hybrid", return_value=[]),
+        patch("marsrag.qa.generate_answer") as generate,
+    ):
+        answer_question("And what happened next?", conversation_history=history)
+
+    embed.assert_not_called()
+    lookup.assert_not_called()
+    generate.assert_called_once()
