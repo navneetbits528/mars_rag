@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "dataset_name": "mars-hrp-evidence-v1",
+  "corpus_report_no": "NASA-HRP-EVIDENCE",
+  "description": "Human-reviewed benchmark for the NASA-HRP-EVIDENCE baseline corpus. Add only questions whose answers and evidence have been checked against the source report and exported chunk inventory.",
+  "examples": []
+}
