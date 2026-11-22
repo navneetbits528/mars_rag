@@ -48,6 +48,17 @@ def test_verify_citations_accepts_exact_quote_and_known_chunk():
     assert citations[0].report_no == "NASA-HRP-EVIDENCE"
 
 
+def test_verify_citations_normalizes_whitespace_and_line_breaks():
+    source = _sources()
+    source[0]["content"] = "The evidence report identifies microbial\\n\\n growth as a food\\t safety risk."
+    citations, valid = verify_citations(
+        [AnswerCitation(chunk_id="chunk-1", quote="MICROBIAL growth as a food safety risk")],
+        source,
+    )
+    assert valid is True
+    assert citations[0].chunk_id == "chunk-1"
+
+
 def test_verify_citations_rejects_unknown_chunk():
     citations, valid = verify_citations(
         [AnswerCitation(chunk_id="missing", quote="microbial growth")],
