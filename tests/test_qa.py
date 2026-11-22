@@ -3,7 +3,11 @@ from unittest.mock import patch
 import pytest
 
 from marsrag.generation import AnswerResponse
-from marsrag.qa import answer_question, _merge_query_results
+from marsrag.qa import (
+    _build_retrieval_queries,
+    _merge_query_results,
+    answer_question,
+)
 from marsrag.query_understanding import QueryPlan
 
 
@@ -68,6 +72,55 @@ def test_answer_question_analyzes_and_fuses_query_results():
     assert result is expected
 
 
+def test_multi_hop_query_uses_decomposed_sub_questions():
+    plan = _plan(
+        route="multi_hop",
+        standalone_query="How did the program evolve and what were its outcomes?",
+        search_queries=["program evolution", "program outcomes"],
+        sub_questions=[
+            "What milestones changed the program?",
+            "What outcomes were reported?",
+        ],
+    )
+    with (
+        patch("marsrag.qa.analyze_query", return_value=plan),
+        patch(
+            "marsrag.qa.search_hybrid",
+            side_effect=[
+                [{"chunk_id": "a", "content": "Milestones"}],
+                [{"chunk_id": "b", "content": "Outcomes"}],
+                [{"chunk_id": "a", "content": "Milestones"}],
+                [{"chunk_id": "c", "content": "Extra"}],
+            ],
+        ) as retrieve,
+        patch("marsrag.qa.generate_answer") as generate,
+    ):
+        answer_question("How did the program evolve and what were its outcomes?")
+
+    assert [call.args[0] for call in retrieve.call_args_list] == [
+        "How did the program evolve and what were its outcomes?",
+        "What milestones changed the program?",
+        "What outcomes were reported?",
+        "program evolution",
+        "program outcomes",
+    ]
+    assert retrieve.call_count == 5
+    evidence = generate.call_args.args[1]
+    assert {item["chunk_id"] for item in evidence} == {"a", "b", "c"}
+
+
+def test_multi_hop_retrieval_query_count_is_bounded():
+    plan = _plan(
+        route="multi_hop",
+        sub_questions=[f"Sub question {i}" for i in range(1, 5)],
+        search_queries=["search one", "search two", "search three"],
+    )
+    queries = _build_retrieval_queries(plan)
+    assert len(queries) == 5
+    assert queries[0] == "What does the report say?"
+    assert queries[1:5] == [f"Sub question {i}" for i in range(1, 5)]
+
+
 def test_answer_question_returns_clarification_without_retrieval():
     plan = _plan(
         route="clarification",
@@ -99,7 +152,7 @@ def test_merge_query_results_deduplicates_and_ranks():
     assert len({item["chunk_id"] for item in merged}) == 3
 
 
-@pytest.mark.parametrize("question", ["", "   ", "\n"])
+@pytest.mark.parametrize("question", ["", "   ", "\\n"])
 def test_answer_question_rejects_empty_question(question):
     with patch("marsrag.qa.analyze_query") as analyze:
         with pytest.raises(ValueError, match="Question cannot be empty"):
