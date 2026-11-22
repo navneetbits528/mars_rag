@@ -1,7 +1,9 @@
+import json
+from collections.abc import AsyncIterator, Iterator
 from contextlib import asynccontextmanager
-from collections.abc import AsyncIterator
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
 
 from marsrag.db import check_database, close_pool
 from marsrag.generation import AnswerResponse
@@ -26,6 +28,21 @@ app = FastAPI(
 )
 
 
+def _run_question(request: AskRequest) -> AnswerResponse:
+    return answer_question(
+        request.question,
+        report_no=request.report_no,
+        top_k=request.top_k,
+        section_path=request.section_path,
+        chunk_type=request.chunk_type,
+        use_reranker=request.use_reranker,
+        model_tier=request.model_tier,
+        conversation_history=[
+            item.model_dump() for item in request.conversation_history
+        ],
+    )
+
+
 @app.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
     database_ok = check_database()
@@ -40,17 +57,30 @@ def health() -> HealthResponse:
 def ask(request: AskRequest) -> AnswerResponse:
     """Retrieve document evidence and return a citation-verified answer."""
     try:
-        return answer_question(
-            request.question,
-            report_no=request.report_no,
-            top_k=request.top_k,
-            section_path=request.section_path,
-            chunk_type=request.chunk_type,
-            use_reranker=request.use_reranker,
-            model_tier=request.model_tier,
-            conversation_history=[
-                item.model_dump() for item in request.conversation_history
-            ],
-        )
+        return _run_question(request)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/ask/stream")
+def ask_stream(request: AskRequest) -> StreamingResponse:
+    """Return the completed, citation-verified answer as server-sent events."""
+
+    def event_stream() -> Iterator[str]:
+        try:
+            result = _run_question(request)
+            payload = json.dumps(result.model_dump(mode="json"), ensure_ascii=False)
+            yield f"event: answer\ndata: {payload}\n\n"
+            yield "event: done\ndata: {}\n\n"
+        except ValueError as exc:
+            payload = json.dumps({"detail": str(exc)}, ensure_ascii=False)
+            yield f"event: error\ndata: {payload}\n\n"
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
