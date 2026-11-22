@@ -77,13 +77,14 @@ def answer_question(
         )
 
     queries = _build_retrieval_queries(plan)
+    effective_chunk_type = chunk_type if chunk_type is not None else plan.chunk_type
     result_sets = [
         search_hybrid(
             query,
             top_k=top_k,
             report_no=report_no,
             section_path=section_path,
-            chunk_type=chunk_type,
+            chunk_type=effective_chunk_type,
             use_reranker=use_reranker,
         )
         for query in queries
