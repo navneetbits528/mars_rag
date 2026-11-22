@@ -6,7 +6,7 @@ from typing import Any, Literal, Sequence
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 
-from marsrag.llm import build_chat_model, invoke_chat
+from marsrag.llm import RequestBudgetExceeded, build_chat_model, invoke_chat
 
 logger = logging.getLogger(__name__)
 
@@ -102,6 +102,8 @@ def analyze_query(
             result = QueryPlan.model_validate(result)
         elif not isinstance(result, QueryPlan):
             result = QueryPlan.model_validate(result)
+    except RequestBudgetExceeded:
+        raise
     except Exception:
         logger.exception("Query analysis failed; falling back to original question.")
         return QueryPlan(
