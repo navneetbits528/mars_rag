@@ -5,6 +5,7 @@ from typing import Any
 from marsrag.retrieval.dense import DEFAULT_REPORT_NO, search_dense
 from marsrag.retrieval.keyword import search_keyword
 from marsrag.retrieval.parent import expand_parent_context
+from marsrag.retrieval.rerank import rerank_results
 
 DEFAULT_RRF_K = 60
 MAX_TOP_K = 50
@@ -17,6 +18,7 @@ def search_hybrid(
     rrf_k: int = DEFAULT_RRF_K,
     section_path: str | None = None,
     chunk_type: str | None = None,
+    use_reranker: bool = False,
 ) -> list[dict[str, Any]]:
     """Fuse dense and keyword search, with optional metadata filters."""
 
@@ -73,5 +75,8 @@ def search_hybrid(
         fused.values(),
         key=lambda item: item["rrf_score"],
         reverse=True,
-    )[:top_k]
-    return expand_parent_context(ranked_results)
+    )
+    if use_reranker:
+        ranked_results = rerank_results(query, ranked_results)
+
+    return expand_parent_context(ranked_results[:top_k])
