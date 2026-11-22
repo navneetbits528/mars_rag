@@ -20,8 +20,14 @@ class HealthResponse(BaseModel):
     corpus_version: int
 
 
+class ConversationMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=2000)
+
+
 class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=4000)
+    conversation_history: list[ConversationMessage] = Field(default_factory=list, max_length=10)
     report_no: str = Field(default="NASA-HRP-EVIDENCE", min_length=1, max_length=200)
     top_k: int = Field(default=5, ge=1, le=50)
     section_path: str | None = None
