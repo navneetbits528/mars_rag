@@ -1,4 +1,18 @@
 from unittest.mock import patch
+from types import SimpleNamespace
+
+@pytest.fixture(autouse=True)
+def mock_filter_resolution(monkeypatch):
+    def fake_resolve(question, *, report_no=None, section_path=None,
+                     chunk_type=None, inferred_chunk_type=None):
+        return SimpleNamespace(
+            report_no=report_no or "NASA-HRP-EVIDENCE",
+            section_path=section_path,
+            chunk_type=chunk_type if chunk_type is not None else inferred_chunk_type,
+        )
+    monkeypatch.setattr("marsrag.qa.resolve_filters", fake_resolve)
+
+
 
 import pytest
 
