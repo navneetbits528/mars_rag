@@ -46,6 +46,7 @@ def _stream_question(
         headers={"Accept": "text/event-stream"},
     ) as response:
         response.raise_for_status()
+        response.encoding = "utf-8"
         for raw_line in response.iter_lines(decode_unicode=True):
             line = raw_line or ""
             if not line:
