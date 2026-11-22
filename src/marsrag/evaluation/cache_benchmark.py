@@ -123,7 +123,7 @@ def main() -> None:
     report = run_cache_benchmark(repeats=args.repeats, threshold=args.threshold)
     destination = Path(args.output)
     destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(json.dumps(report, indent=2) + "\\n", encoding="utf-8")
+    destination.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
     print(f"Embedding generation: {report['embedding_generation_ms']:.3f} ms")
     print(f"Initial cache miss: {report['initial_cache_miss_ms']:.3f} ms")
