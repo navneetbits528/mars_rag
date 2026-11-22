@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 import re
 from typing import Any
@@ -130,7 +131,7 @@ def generate_answer(
         HumanMessage(
             content=(
                 f"Question: {question.strip()}\n\n"
-                f"Evidence JSON: {_source_payload(sources)!r}"
+                f"Evidence JSON: {json.dumps(_source_payload(sources), ensure_ascii=False)}"
             )
         ),
     ]
