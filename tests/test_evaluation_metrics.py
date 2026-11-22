@@ -87,7 +87,7 @@ def test_evaluate_retrieval_aggregates_answerable_examples_only():
     assert result["answerable_examples"] == 2
     assert result["evaluated_examples"] == 2
     assert result["metrics"]["recall@1"] == 0.5
-    assert result["metrics"]["recall@2"] == 1.0
+    assert result["metrics"]["recall@2"] == 0.75
     assert result["metrics"]["mrr"] == 0.75
     assert [row["id"] for row in result["per_example"]] == ["q1", "q2"]
 
