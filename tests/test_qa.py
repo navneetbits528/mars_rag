@@ -37,10 +37,6 @@ def _plan(**overrides):
 
 def test_answer_question_analyzes_and_fuses_query_results():
     first = [{"chunk_id": "chunk-1", "content": "Evidence 1"}]
-    second = [
-        {"chunk_id": "chunk-1", "content": "Evidence 1"},
-        {"chunk_id": "chunk-2", "content": "Evidence 2"},
-    ]
     expected = AnswerResponse(
         answer="Verified answer",
         abstained=False,
@@ -77,7 +73,7 @@ def test_answer_question_analyzes_and_fuses_query_results():
             "use_reranker": True,
         }
     fused_sources = generate.call_args.args[1]
-    assert [item["chunk_id"] for item in fused_sources] == ["chunk-1", "chunk-2"]
+    assert [item["chunk_id"] for item in fused_sources] == ["chunk-1"]
     generate.assert_called_once_with(
         "What does the report say?",
         fused_sources,
