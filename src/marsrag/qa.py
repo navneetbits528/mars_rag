@@ -6,7 +6,7 @@ import logging
 from langgraph.graph import END, START, StateGraph
 
 from marsrag.filter_resolution import ResolvedFilters, resolve_filters
-from marsrag.generation import AnswerResponse, generate_answer
+from marsrag.generation import AnswerResponse, generate_answer, stream_draft_answer
 from marsrag.llm import RequestBudgetExceeded, request_api_budget
 from marsrag.settings import get_settings
 from marsrag.llm import embed_query
@@ -220,6 +220,75 @@ def _generate_node(state: QAState) -> dict[str, Any]:
             model_tier=state["model_tier"],
         )
     }
+
+
+def stream_answer_question(
+    question: str,
+    *,
+    report_no: str | None = None,
+    top_k: int = 5,
+    section_path: str | None = None,
+    chunk_type: str | None = None,
+    use_reranker: bool = False,
+    model_tier: str = "main",
+    conversation_history: Sequence[dict[str, str]] | None = None,
+):
+    """Yield provisional text tokens followed by the final verified QA response."""
+    if not question or not question.strip():
+        raise ValueError("Question cannot be empty.")
+
+    state: QAState = {
+        "question": question.strip(),
+        "report_no": report_no,
+        "top_k": top_k,
+        "section_path": section_path,
+        "chunk_type": chunk_type,
+        "use_reranker": use_reranker,
+        "model_tier": model_tier,
+        "conversation_history": conversation_history,
+    }
+    try:
+        with request_api_budget(get_settings().max_requests_per_qa):
+            yield "status", {"stage": "analyzing"}
+            state.update(_analyze_node(state))
+            if "response" in state:
+                yield "answer", state["response"].model_dump(mode="json")
+                return
+
+            state.update(_resolve_filters_node(state))
+            yield "status", {"stage": "retrieving"}
+            state.update(_cache_lookup_node(state))
+            if "response" in state:
+                yield "answer", state["response"].model_dump(mode="json")
+                return
+
+            if state["plan"].route == "simple":
+                state.update(_fast_retrieval_node(state))
+            else:
+                state.update(_slow_retrieval_node(state))
+            state.update(_aggregate_node(state))
+
+            if state.get("sources"):
+                yield "status", {"stage": "drafting", "verified": False}
+                for token in stream_draft_answer(
+                    state["question"],
+                    state["sources"],
+                    model_tier=state["model_tier"],
+                ):
+                    yield "token", {"text": token, "verified": False}
+
+            yield "status", {"stage": "verifying"}
+            state.update(_generate_node(state))
+            _store_cache_node(state)
+            yield "answer", state["response"].model_dump(mode="json")
+    except RequestBudgetExceeded:
+        response = AnswerResponse(
+            answer="The configured AI API budget has been reached. Please try again later.",
+            abstained=True,
+            verified=False,
+            reason="Configured API budget exhausted.",
+        )
+        yield "answer", response.model_dump(mode="json")
 
 
 def build_qa_graph():
