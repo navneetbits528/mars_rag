@@ -50,7 +50,7 @@ def test_verify_citations_accepts_exact_quote_and_known_chunk():
 
 def test_verify_citations_normalizes_whitespace_and_line_breaks():
     source = _sources()
-    source[0]["content"] = "The evidence report identifies microbial\\n\\n growth as a food\\t safety risk."
+    source[0]["content"] = "The evidence report identifies microbial\n\n growth as a food\t safety risk."
     citations, valid = verify_citations(
         [AnswerCitation(chunk_id="chunk-1", quote="MICROBIAL growth as a food safety risk")],
         source,
