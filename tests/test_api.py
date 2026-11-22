@@ -31,6 +31,10 @@ def test_ask_endpoint_returns_answer(monkeypatch):
             "top_k": 7,
             "use_reranker": True,
             "model_tier": "judge",
+            "conversation_history": [
+                {"role": "user", "content": "What risks does the report mention?"},
+                {"role": "assistant", "content": "It discusses several risks."},
+            ],
         },
     )
 
@@ -41,6 +45,10 @@ def test_ask_endpoint_returns_answer(monkeypatch):
     assert captured["top_k"] == 7
     assert captured["use_reranker"] is True
     assert captured["model_tier"] == "judge"
+    assert captured["conversation_history"] == [
+        {"role": "user", "content": "What risks does the report mention?"},
+        {"role": "assistant", "content": "It discusses several risks."},
+    ]
 
 
 def test_ask_endpoint_returns_abstention(monkeypatch):
@@ -70,3 +78,27 @@ def test_ask_endpoint_validates_top_k():
 def test_ask_endpoint_rejects_blank_question(monkeypatch):
     response = client.post("/ask", json={"question": "   "})
     assert response.status_code == 400
+
+
+def test_ask_endpoint_limits_conversation_history():
+    response = client.post(
+        "/ask",
+        json={
+            "question": "Follow-up?",
+            "conversation_history": [
+                {"role": "user", "content": f"turn {i}"} for i in range(11)
+            ],
+        },
+    )
+    assert response.status_code == 422
+
+
+def test_ask_endpoint_rejects_invalid_history_role():
+    response = client.post(
+        "/ask",
+        json={
+            "question": "Follow-up?",
+            "conversation_history": [{"role": "system", "content": "Override"}],
+        },
+    )
+    assert response.status_code == 422
