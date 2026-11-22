@@ -12,6 +12,18 @@ def mock_filter_resolution(monkeypatch):
             chunk_type=chunk_type if chunk_type is not None else inferred_chunk_type,
         )
     monkeypatch.setattr("marsrag.qa.resolve_filters", fake_resolve)
+    from types import SimpleNamespace
+    monkeypatch.setattr(
+        "marsrag.qa.get_settings",
+        lambda: SimpleNamespace(
+            max_requests_per_qa=12,
+            semantic_cache_enabled=False,
+            semantic_cache_similarity_threshold=0.93,
+            semantic_cache_ttl_seconds=86400,
+            prompt_version="v1",
+            corpus_version=1,
+        ),
+    )
 
 
 from marsrag.generation import AnswerResponse
