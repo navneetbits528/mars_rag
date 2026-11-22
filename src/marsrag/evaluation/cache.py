@@ -43,7 +43,7 @@ class CacheEvalDataset(BaseModel):
 
 
 def load_cache_dataset(path: str | Path) -> CacheEvalDataset:
-    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    payload = json.loads(Path(path).read_text(encoding="utf-8-sig"))
     return CacheEvalDataset.model_validate(payload)
 
 
