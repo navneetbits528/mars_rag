@@ -67,3 +67,17 @@ uv run python -m marsrag.evaluation.cache_benchmark --repeats 30 --threshold 0.9
 This benchmark generates one query embedding, measures an initial database miss, inserts one verified benchmark-only answer under a unique temporary cache key, and measures repeated database hits using the precomputed embedding. It deletes the temporary cache-key entry in a `finally` block.
 
 The hit lookup measurements exclude embedding API latency; embedding generation is reported separately. This does not measure full QA latency or answer generation. Do not interpret the database lookup result as end-to-end user-perceived latency.
+
+## Step 6: Build the consolidated evaluation report
+
+After running the retrieval ablation, cache-threshold evaluation, and live PostgreSQL cache benchmark, combine their existing JSON outputs:
+
+```powershell
+uv run python -m marsrag.evaluation.report --ablation eval/ablation_results.json --cache-thresholds eval/cache_results.json --cache-benchmark eval/cache_benchmark_results.json --json-output eval/final_evaluation_report.json --csv-output eval/final_evaluation_report.csv
+```
+
+The command does not call the embedding or generation APIs. It creates:
+- `final_evaluation_report.json`: complete source reports, metadata, and evaluation limitations.
+- `final_evaluation_report.csv`: flattened metrics suitable for spreadsheet analysis.
+
+An answer-quality JSON can optionally be included with `--answer-quality`. The answer-quality evaluator currently exposes a Python function; it does not automatically produce this file.
