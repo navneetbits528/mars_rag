@@ -61,7 +61,7 @@ class AnswerResponse(BaseModel):
 
 
 def _normalize_quote(value: str) -> str:
-    return re.sub(r"\\s+", " ", value).strip().casefold()
+    return re.sub(r"\s+", " ", value).strip().casefold()
 
 
 def verify_citations(
