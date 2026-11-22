@@ -107,7 +107,7 @@ def test_multi_hop_query_uses_decomposed_sub_questions():
     ]
     assert retrieve.call_count == 5
     evidence = generate.call_args.args[1]
-    assert {item["chunk_id"] for item in evidence} == {"a", "b", "c"}
+    assert {item["chunk_id"] for item in evidence} == {"a", "b", "c", "d"}
 
 
 def test_multi_hop_retrieval_query_count_is_bounded():
