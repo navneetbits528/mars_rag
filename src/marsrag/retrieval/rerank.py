@@ -7,7 +7,7 @@ from typing import Any
 
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from marsrag.llm import build_chat_model, invoke_chat
+from marsrag.llm import RequestBudgetExceeded, build_chat_model, invoke_chat
 
 logger = logging.getLogger(__name__)
 
@@ -107,6 +107,8 @@ def rerank_results(
     try:
         response = invoke_chat(build_chat_model(tier="judge"), messages)
         rankings = _parse_rankings(_response_text(response), allowed_ids)
+    except RequestBudgetExceeded:
+        raise
     except Exception:
         logger.exception("Reranking failed; retaining reciprocal-rank-fusion order.")
         return candidates
