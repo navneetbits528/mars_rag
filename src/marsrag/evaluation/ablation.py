@@ -116,7 +116,9 @@ def run_ablation(
     top_k: int = 5,
 ) -> dict[str, Any]:
     """Run every retrieval configuration against the same labelled questions."""
-    configured_methods = methods or build_ablation_methods(top_k=top_k)
+    configured_methods = (
+        build_ablation_methods(top_k=top_k) if methods is None else methods
+    )
     if not configured_methods:
         raise ValueError("At least one ablation method is required.")
 
