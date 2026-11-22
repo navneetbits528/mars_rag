@@ -54,3 +54,16 @@ A false positive is especially important: it means the threshold would reuse an 
 
 This experiment evaluates semantic-match decisions, not end-to-end PostgreSQL lookup latency or answer correctness after retrieval. Those require a separate live-cache benchmark. Keep the human-labelled pair set balanced and review it against the source report.
 
+
+
+## Step 5: Benchmark live PostgreSQL cache latency
+
+With Docker Compose/PostgreSQL running and a valid `.env`, run:
+
+```powershell
+uv run python -m marsrag.evaluation.cache_benchmark --repeats 30 --threshold 0.93 --output eval/cache_benchmark_results.json
+```
+
+This benchmark generates one query embedding, measures an initial database miss, inserts one verified benchmark-only answer under a unique temporary cache key, and measures repeated database hits using the precomputed embedding. It deletes the temporary cache-key entry in a `finally` block.
+
+The hit lookup measurements exclude embedding API latency; embedding generation is reported separately. This does not measure full QA latency or answer generation. Do not interpret the database lookup result as end-to-end user-perceived latency.
