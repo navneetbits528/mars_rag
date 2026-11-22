@@ -21,6 +21,7 @@ def build_cache_key(
     model_tier: str,
     prompt_version: str,
     corpus_version: int,
+    query_route: str = "simple",
 ) -> str:
     """Create a deterministic scope key so answers never cross retrieval contexts."""
     scope = {
@@ -32,6 +33,7 @@ def build_cache_key(
         "model_tier": model_tier,
         "prompt_version": prompt_version,
         "corpus_version": corpus_version,
+        "query_route": query_route,
     }
     encoded = json.dumps(scope, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
