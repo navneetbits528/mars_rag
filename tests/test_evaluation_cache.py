@@ -80,7 +80,7 @@ def test_load_cache_dataset_accepts_utf8_bom(tmp_path):
         ],
     }
     path = tmp_path / "cache_dataset.json"
-    path.write_bytes(b"\\xef\\xbb\\xbf" + __import__("json").dumps(payload).encode("utf-8"))
+    path.write_bytes(b"\xef\xbb\xbf" + __import__("json").dumps(payload).encode("utf-8"))
 
     dataset = load_cache_dataset(path)
 
