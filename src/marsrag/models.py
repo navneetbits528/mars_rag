@@ -28,9 +28,9 @@ class ConversationMessage(BaseModel):
 class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=4000)
     conversation_history: list[ConversationMessage] = Field(default_factory=list, max_length=10)
-    report_no: str = Field(default="NASA-HRP-EVIDENCE", min_length=1, max_length=200)
+    report_no: str | None = Field(default=None, min_length=1, max_length=200)
     top_k: int = Field(default=5, ge=1, le=50)
-    section_path: str | None = None
-    chunk_type: str | None = None
+    section_path: str | None = Field(default=None, min_length=1, max_length=500)
+    chunk_type: str | None = Field(default=None, min_length=1, max_length=50)
     use_reranker: bool = False
     model_tier: Literal["fast", "main", "deep", "judge"] = "main"
