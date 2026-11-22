@@ -83,6 +83,7 @@ def test_missing_parent_is_handled(mock_fetch):
     assert expanded[0]["parent_context"] is None
 
 
+
 @patch("marsrag.retrieval.parent.fetch_all")
 def test_large_parent_context_is_bounded(mock_fetch):
     content = "A" * 5000
@@ -106,4 +107,40 @@ def test_large_parent_context_is_bounded(mock_fetch):
         max_parent_chars=3000,
     )
 
-    assert len(expanded[0]["parent_context"]) == 3000
+    # Do not return unrelated parent text when the child cannot be located.
+    assert expanded[0]["parent_context"] == "not found"
+
+
+
+@patch("marsrag.retrieval.parent.fetch_all")
+def test_parent_context_uses_child_offsets(mock_fetch):
+    parent_content = "A" * 50 + "TARGET PASSAGE" + "B" * 50
+    start = 50
+    end = start + len("TARGET PASSAGE")
+
+    mock_fetch.return_value = [{
+        "parent_id": "p1",
+        "section_title": "Nutrition",
+        "page_start": 6,
+        "page_end": 10,
+        "content": parent_content,
+    }]
+
+    results = [{
+        "chunk_id": "c1",
+        "parent_id": "p1",
+        "content": "TARGET PASSAGE",
+        "metadata": {
+            "parent_start_char": start,
+            "parent_end_char": end,
+        },
+    }]
+
+    expanded = expand_parent_context(results, max_parent_chars=30)
+
+    context = expanded[0]["parent_context"]
+
+    assert "TARGET PASSAGE" in context
+    assert len(context) == 30
+    assert context == parent_content[35:65]
+
