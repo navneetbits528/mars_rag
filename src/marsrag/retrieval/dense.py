@@ -51,8 +51,8 @@ def search_dense(
         WHERE report_no = %s
           AND status = 'current'
           AND embedding IS NOT NULL
-          AND (%s IS NULL OR section_path = %s)
-          AND (%s IS NULL OR chunk_type = %s)
+          AND (%s::text IS NULL OR section_path = %s::text)
+          AND (%s::text IS NULL OR chunk_type = %s::text)
         ORDER BY embedding <=> %s::vector
         LIMIT %s
     """
