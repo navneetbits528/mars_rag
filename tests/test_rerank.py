@@ -1,4 +1,3 @@
-from types import SimpleNamespace
 from unittest.mock import patch
 
 from marsrag.retrieval import rerank
@@ -12,15 +11,24 @@ def _candidates():
     ]
 
 
+def _structured_model():
+    class Model:
+        def with_structured_output(self, schema):
+            assert schema is rerank.RerankResponse
+            return self
+    return Model()
+
+
 def test_rerank_results_orders_by_judge_score_and_preserves_metadata():
-    response = SimpleNamespace(
-        content='{"rankings": ['
-        '{"chunk_id": "A", "score": 2, "reason": "partial"},'
-        '{"chunk_id": "B", "score": 5, "reason": "direct"},'
-        '{"chunk_id": "C", "score": 3, "reason": "related"}]}'
-    )
+    response = {
+        "rankings": [
+            {"chunk_id": "A", "score": 2, "reason": "partial"},
+            {"chunk_id": "B", "score": 5, "reason": "direct"},
+            {"chunk_id": "C", "score": 3, "reason": "related"},
+        ]
+    }
     with (
-        patch.object(rerank, "build_chat_model", return_value=object()),
+        patch.object(rerank, "build_chat_model", return_value=_structured_model()),
         patch.object(rerank, "invoke_chat", return_value=response) as invoke,
     ):
         results = rerank.rerank_results("What is the answer?", _candidates())
@@ -33,12 +41,14 @@ def test_rerank_results_orders_by_judge_score_and_preserves_metadata():
 
 
 def test_rerank_limits_candidates_and_keeps_unscored_tail():
-    response = SimpleNamespace(
-        content='{"rankings":[{"chunk_id":"A","score":4,"reason":"ok"},'
-        '{"chunk_id":"B","score":3,"reason":"ok"}]}'
-    )
+    response = {
+        "rankings": [
+            {"chunk_id": "A", "score": 4, "reason": "ok"},
+            {"chunk_id": "B", "score": 3, "reason": "ok"},
+        ]
+    }
     with (
-        patch.object(rerank, "build_chat_model", return_value=object()),
+        patch.object(rerank, "build_chat_model", return_value=_structured_model()),
         patch.object(rerank, "invoke_chat", return_value=response),
     ):
         results = rerank.rerank_results("question", _candidates(), max_candidates=2)
@@ -47,15 +57,28 @@ def test_rerank_limits_candidates_and_keeps_unscored_tail():
     assert "rerank_score" not in results[-1]
 
 
-def test_rerank_falls_back_to_original_order_for_invalid_json():
+def test_rerank_falls_back_to_original_order_for_invalid_structured_output():
     original = _candidates()
     with (
-        patch.object(rerank, "build_chat_model", return_value=object()),
-        patch.object(rerank, "invoke_chat", return_value=SimpleNamespace(content="not json")),
+        patch.object(rerank, "build_chat_model", return_value=_structured_model()),
+        patch.object(rerank, "invoke_chat", return_value={"unexpected": []}),
     ):
         results = rerank.rerank_results("question", original)
 
     assert results == original
+
+
+def test_rerank_rejects_unknown_duplicate_or_missing_ids():
+    import pytest
+
+    allowed = {"A", "B"}
+    for rankings in (
+        [{"chunk_id": "A", "score": 4}, {"chunk_id": "X", "score": 3}],
+        [{"chunk_id": "A", "score": 4}, {"chunk_id": "A", "score": 3}],
+        [{"chunk_id": "A", "score": 4}],
+    ):
+        with pytest.raises(ValueError):
+            rerank._validate_rankings({"rankings": rankings}, allowed)
 
 
 def test_rerank_skips_model_for_empty_candidates():
