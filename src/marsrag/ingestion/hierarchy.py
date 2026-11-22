@@ -119,7 +119,7 @@ def build_parent_child_records(
                 child_id = stable_chunk_id(
                     report_no,
                     chunk.page,
-                    f"{chunk.chunk_type}:{normalized}",
+                    f"{chunk.section_path}:{chunk.chunk_type}:{normalized}",
                 )
 
                 metadata = {

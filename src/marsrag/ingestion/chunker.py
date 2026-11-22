@@ -3,6 +3,9 @@ from marsrag.ingestion.models import PageText,ChunkRecord
 from marsrag.settings import get_settings
 
 _NUM=re.compile(r"^\s*(\d+(?:\.\d+){0,4})\s+([A-Z][^\n]{2,120})$")
+_ROMAN = re.compile(
+    r"^\s*([IVXLCDM]{1,8})\.\s+([A-Z][A-Z0-9 /,:()&\-]{2,120})\s*$"
+)
 _CAPS=re.compile(r"^\s*([A-Z][A-Z0-9 /,:()\-]{4,100})\s*$")
 
 def normalize_text(text: str) -> str:
@@ -13,10 +16,18 @@ def stable_chunk_id(report_no: str,page: int,text: str) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 def _heading(line):
-    match=_NUM.match(line)
-    if match: return match.group(1),match.group(2).strip()
-    match=_CAPS.match(line)
-    if match and not line.isdigit(): return "",match.group(1).title()
+    match = _NUM.match(line)
+    if match:
+        return match.group(1), match.group(2).strip()
+
+    match = _ROMAN.match(line)
+    if match:
+        return match.group(1), match.group(2).strip()
+
+    match = _CAPS.match(line)
+    if match and not line.isdigit():
+        return "", match.group(1).title()
+
     return None
 
 def _split(text,size,overlap):
