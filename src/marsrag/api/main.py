@@ -1,3 +1,6 @@
+from contextlib import asynccontextmanager
+from collections.abc import AsyncIterator
+
 from fastapi import FastAPI, HTTPException
 
 from marsrag.db import check_database, close_pool
@@ -6,7 +9,21 @@ from marsrag.models import AskRequest, HealthResponse
 from marsrag.qa import answer_question
 from marsrag.settings import get_settings
 
-app = FastAPI(title="Mars Missions RAG API", version="0.2.0")
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    """Manage resources for the lifetime of the API process."""
+    try:
+        yield
+    finally:
+        close_pool()
+
+
+app = FastAPI(
+    title="Mars Missions RAG API",
+    version="0.2.0",
+    lifespan=lifespan,
+)
 
 
 @app.get("/health", response_model=HealthResponse)
@@ -34,8 +51,3 @@ def ask(request: AskRequest) -> AnswerResponse:
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-
-@app.on_event("shutdown")
-def shutdown_event() -> None:
-    close_pool()
