@@ -1,3 +1,4 @@
+import pytest
 from unittest.mock import patch
 from types import SimpleNamespace
 
@@ -12,9 +13,6 @@ def mock_filter_resolution(monkeypatch):
         )
     monkeypatch.setattr("marsrag.qa.resolve_filters", fake_resolve)
 
-
-
-import pytest
 
 from marsrag.generation import AnswerResponse
 from marsrag.qa import (
