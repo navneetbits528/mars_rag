@@ -8,7 +8,7 @@ from typing import Any
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 
-from marsrag.llm import build_chat_model, invoke_chat
+from marsrag.llm import RequestBudgetExceeded, build_chat_model, invoke_chat
 
 logger = logging.getLogger(__name__)
 
@@ -164,6 +164,8 @@ def verify_claim_support(
             and set(claim.citation_chunk_ids).issubset(cited_ids)
             for claim in result.claims
         )
+    except RequestBudgetExceeded:
+        raise
     except Exception:
         logger.exception("Claim-level verification failed.")
         return False
@@ -219,6 +221,8 @@ def generate_answer(
             generated = GeneratedAnswer.model_validate(generated)
         elif not isinstance(generated, GeneratedAnswer):
             generated = GeneratedAnswer.model_validate(generated)
+    except RequestBudgetExceeded:
+        raise
     except Exception:
         logger.exception("Answer generation failed.")
         return AnswerResponse(
