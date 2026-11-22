@@ -372,3 +372,54 @@ def test_semantic_cache_budget_exhaustion_is_not_silenced(monkeypatch):
     assert result.abstained is True
     assert result.reason == "Configured API budget exhausted."
     retrieve.assert_not_called()
+
+
+
+def test_stream_answer_question_emits_provisional_tokens_then_verified_answer():
+    from marsrag.qa import stream_answer_question
+
+    expected = AnswerResponse(
+        answer="Verified final answer.",
+        abstained=False,
+        verified=True,
+        citations=[],
+    )
+    with (
+        patch("marsrag.qa.analyze_query", return_value=_plan()),
+        patch("marsrag.qa.search_hybrid", return_value=[
+            {"chunk_id": "chunk-1", "content": "Evidence"}
+        ]),
+        patch("marsrag.qa.stream_draft_answer", return_value=iter(["Draft ", "text."])),
+        patch("marsrag.qa.generate_answer", return_value=expected) as generate,
+    ):
+        events = list(stream_answer_question("What does the report say?"))
+
+    token_events = [data for name, data in events if name == "token"]
+    assert token_events == [
+        {"text": "Draft ", "verified": False},
+        {"text": "text.", "verified": False},
+    ]
+    final_event = [data for name, data in events if name == "answer"][-1]
+    assert final_event["answer"] == "Verified final answer."
+    assert final_event["verified"] is True
+    generate.assert_called_once()
+
+
+def test_stream_answer_question_returns_clarification_without_tokens():
+    from marsrag.qa import stream_answer_question
+
+    plan = _plan(
+        route="clarification",
+        clarification_question="Which mission do you mean?",
+    )
+    with (
+        patch("marsrag.qa.analyze_query", return_value=plan),
+        patch("marsrag.qa.stream_draft_answer") as draft,
+        patch("marsrag.qa.search_hybrid") as retrieve,
+    ):
+        events = list(stream_answer_question("What about its timeline?"))
+
+    assert [name for name, _ in events] == ["status", "answer"]
+    assert events[-1][1]["answer"] == "Which mission do you mean?"
+    draft.assert_not_called()
+    retrieve.assert_not_called()
