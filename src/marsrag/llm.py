@@ -1,5 +1,7 @@
 from __future__ import annotations
 import logging, time
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass
 from typing import Any, Callable, TypeVar
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
@@ -10,6 +12,20 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")
 class RequestBudgetExceeded(RuntimeError): pass
 class MissingAPIKeyError(RuntimeError): pass
+
+_request_api_calls: ContextVar[dict[str, int] | None] = ContextVar("request_api_calls", default=None)
+
+@contextmanager
+def request_api_budget(max_requests: int):
+    """Apply an isolated API-call ceiling to the current QA request."""
+    if max_requests < 1:
+        raise ValueError("max_requests must be at least 1.")
+    state = {"used": 0, "limit": max_requests}
+    token = _request_api_calls.set(state)
+    try:
+        yield state
+    finally:
+        _request_api_calls.reset(token)
 
 @dataclass
 class UsageTotals:
@@ -25,6 +41,13 @@ class DemoUsageTracker:
         self.totals = UsageTotals()
 
     def reserve_request(self):
+        request_state = _request_api_calls.get()
+        if request_state is not None:
+            if request_state["used"] >= request_state["limit"]:
+                raise RequestBudgetExceeded(
+                    f"QA request API budget exhausted ({request_state['limit']})."
+                )
+            request_state["used"] += 1
         if self.totals.api_requests >= self.settings.openai_max_requests:
             raise RequestBudgetExceeded(f"Demo API request budget exhausted ({self.settings.openai_max_requests}).")
         if self.totals.estimated_cost_usd >= self.settings.daily_cost_limit_usd:
