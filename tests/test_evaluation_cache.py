@@ -57,3 +57,64 @@ def test_cache_dataset_requires_both_pair_classes():
 def test_thresholds_must_be_valid():
     with pytest.raises(ValueError):
         evaluate_cache_thresholds(_dataset(), lambda _a, _b: 0.9, thresholds=(0.0,))
+
+def test_load_cache_dataset_accepts_utf8_bom(tmp_path):
+    from marsrag.evaluation.cache import load_cache_dataset
+
+    payload = {
+        "schema_version": 1,
+        "dataset_name": "bom-test",
+        "pairs": [
+            {
+                "id": "same",
+                "cached_question": "What is the crew size?",
+                "candidate_question": "How many crew members?",
+                "equivalent": True,
+            },
+            {
+                "id": "different",
+                "cached_question": "What is the crew size?",
+                "candidate_question": "What is the radiation limit?",
+                "equivalent": False,
+            },
+        ],
+    }
+    path = tmp_path / "cache_dataset.json"
+    path.write_bytes(b"\\xef\\xbb\\xbf" + __import__("json").dumps(payload).encode("utf-8"))
+
+    dataset = load_cache_dataset(path)
+
+    assert dataset.dataset_name == "bom-test"
+    assert len(dataset.pairs) == 2
+
+
+def test_load_cache_dataset_accepts_utf8_without_bom(tmp_path):
+    import json
+
+    from marsrag.evaluation.cache import load_cache_dataset
+
+    payload = {
+        "dataset_name": "utf8-test",
+        "pairs": [
+            {
+                "id": "same",
+                "cached_question": "What is the crew size?",
+                "candidate_question": "How many crew members?",
+                "equivalent": True,
+            },
+            {
+                "id": "different",
+                "cached_question": "What is the crew size?",
+                "candidate_question": "What is the radiation limit?",
+                "equivalent": False,
+            },
+        ],
+    }
+    path = tmp_path / "cache_dataset.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    dataset = load_cache_dataset(path)
+
+    assert dataset.dataset_name == "utf8-test"
+    assert len(dataset.pairs) == 2
+
