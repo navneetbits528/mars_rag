@@ -84,3 +84,37 @@ def test_hybrid_rejects_empty_report_no():
 def test_hybrid_rejects_blank_filters(kwargs):
     with pytest.raises(ValueError, match="cannot be empty"):
         hybrid.search_hybrid("nutrition", **kwargs)
+
+def test_hybrid_applies_reranker_before_top_k_and_parent_expansion():
+    candidates = [
+        {"chunk_id": "A", "content": "A", "rrf_score": 0.03},
+        {"chunk_id": "B", "content": "B", "rrf_score": 0.02},
+    ]
+    reranked = [
+        {**candidates[1], "rerank_score": 5, "rerank_rank": 1},
+        {**candidates[0], "rerank_score": 1, "rerank_rank": 2},
+    ]
+    with (
+        patch.object(hybrid, "search_dense", return_value=candidates),
+        patch.object(hybrid, "search_keyword", return_value=[]),
+        patch.object(hybrid, "rerank_results", return_value=reranked) as rerank_mock,
+        patch.object(hybrid, "expand_parent_context", side_effect=lambda x: x) as expand_mock,
+    ):
+        results = hybrid.search_hybrid("question", top_k=1, use_reranker=True)
+
+    rerank_mock.assert_called_once()
+    assert rerank_mock.call_args.args[1][0]["chunk_id"] == "A"
+    expand_mock.assert_called_once_with([reranked[0]])
+    assert results[0]["chunk_id"] == "B"
+
+
+def test_hybrid_does_not_call_reranker_by_default():
+    with (
+        patch.object(hybrid, "search_dense", return_value=[]),
+        patch.object(hybrid, "search_keyword", return_value=[]),
+        patch.object(hybrid, "rerank_results") as rerank_mock,
+        patch.object(hybrid, "expand_parent_context", side_effect=lambda x: x),
+    ):
+        hybrid.search_hybrid("question")
+
+    rerank_mock.assert_not_called()
