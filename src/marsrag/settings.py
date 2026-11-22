@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql://marsrag:marsrag_dev_password@localhost:5432/marsrag"
     admin_api_key: str = Field(default="change-this-demo-admin-key", repr=False)
     openai_max_requests: int = 10
+    max_requests_per_qa: int = 12
     daily_cost_limit_usd: float = 2.0
     max_retries: int = 2
     retry_base_seconds: float = 0.5
@@ -47,11 +48,11 @@ class Settings(BaseSettings):
             raise ValueError("EMBED_DIM must be between 1 and 2000.")
         return value
 
-    @field_validator("openai_max_requests")
+    @field_validator("openai_max_requests", "max_requests_per_qa")
     @classmethod
     def valid_budget(cls, value):
         if value < 1:
-            raise ValueError("OPENAI_MAX_REQUESTS must be at least 1.")
+            raise ValueError("API request limits must be at least 1.")
         return value
 
     @field_validator("chunk_overlap_ratio")
