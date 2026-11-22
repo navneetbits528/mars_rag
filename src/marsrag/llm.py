@@ -3,7 +3,7 @@ import logging, time
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, Iterator, TypeVar
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from openai import APIConnectionError, APIStatusError, RateLimitError
 from marsrag.settings import get_settings
@@ -121,3 +121,35 @@ def embed_documents(texts: list[str]) -> list[list[float]]:
 
 def embed_query(text: str) -> list[float]:
     return embed_documents([text])[0]
+
+def stream_chat(model: ChatOpenAI, messages: list[Any]) -> Iterator[str]:
+    """Stream text chunks while charging one request to the active API budget."""
+    usage_tracker.reserve_request()
+    input_tokens = 0
+    output_tokens = 0
+    usage_seen = False
+    try:
+        for chunk in model.stream(messages):
+            meta = getattr(chunk, "usage_metadata", None) or {}
+            if meta:
+                usage_seen = True
+                input_tokens = max(input_tokens, int(meta.get("input_tokens", 0)))
+                output_tokens = max(output_tokens, int(meta.get("output_tokens", 0)))
+            content = getattr(chunk, "content", "")
+            if isinstance(content, str):
+                if content:
+                    yield content
+            elif isinstance(content, list):
+                for part in content:
+                    if isinstance(part, dict) and part.get("type") == "text":
+                        text = part.get("text", "")
+                        if text:
+                            yield str(text)
+    finally:
+        if usage_seen:
+            usage_tracker.record_chat(
+                getattr(model, "model_name", "configured-model"),
+                input_tokens,
+                output_tokens,
+            )
+
