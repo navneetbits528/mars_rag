@@ -113,7 +113,7 @@ def export_chunk_candidates(
     destination.parent.mkdir(parents=True, exist_ok=True)
     with destination.open("w", encoding="utf-8") as file:
         for row in rows:
-            file.write(json.dumps(row, ensure_ascii=False) + "\\n")
+            file.write(json.dumps(row, ensure_ascii=False) + "\n")
     return len(rows)
 
 
