@@ -242,6 +242,11 @@ def test_answer_question_returns_abstention_when_request_budget_is_exhausted():
 def _enable_cache(monkeypatch):
     from types import SimpleNamespace
 
+    # Keep cache tests isolated from live LLM query classification.
+    monkeypatch.setattr(
+        "marsrag.qa.analyze_query",
+        lambda question, conversation_history=None: _plan(),
+    )
     monkeypatch.setattr(
         "marsrag.qa.get_settings",
         lambda: SimpleNamespace(
