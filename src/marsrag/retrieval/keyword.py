@@ -51,8 +51,8 @@ def search_keyword(
         FROM chunks
         WHERE report_no = %s
           AND status = 'current'
-          AND (%s IS NULL OR section_path = %s)
-          AND (%s IS NULL OR chunk_type = %s)
+          AND (%s::text IS NULL OR section_path = %s::text)
+          AND (%s::text IS NULL OR chunk_type = %s::text)
           AND content_tsv @@ websearch_to_tsquery(
               'english',
               regexp_replace(%s, '\s+', ' OR ', 'g')
