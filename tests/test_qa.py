@@ -50,7 +50,10 @@ def test_answer_question_analyzes_and_fuses_query_results():
             model_tier="judge",
         )
 
-    analyze.assert_called_once_with("What does the report say?")
+    analyze.assert_called_once_with(
+        "What does the report say?",
+        conversation_history=None,
+    )
     assert retrieve.call_count == 2
     assert retrieve.call_args_list[0].args == ("What does the report say?",)
     assert retrieve.call_args_list[1].args == ("report findings",)
@@ -161,7 +164,6 @@ def test_answer_question_rejects_empty_question(question):
     analyze.assert_not_called()
 
 
-
 def test_answer_question_applies_extracted_chunk_type_filter():
     plan = _plan(chunk_type="table")
     with (
@@ -186,3 +188,21 @@ def test_explicit_chunk_type_overrides_extracted_filter():
 
     assert retrieve.call_count == 2
     assert all(call.kwargs["chunk_type"] == "text" for call in retrieve.call_args_list)
+
+
+def test_answer_question_passes_history_to_query_analysis():
+    history = [
+        {"role": "user", "content": "What risks are identified?"},
+        {"role": "assistant", "content": "Several risks are discussed."},
+    ]
+    with (
+        patch("marsrag.qa.analyze_query", return_value=_plan()) as analyze,
+        patch("marsrag.qa.search_hybrid", return_value=[]),
+        patch("marsrag.qa.generate_answer"),
+    ):
+        answer_question("Which relate to radiation?", conversation_history=history)
+
+    analyze.assert_called_once_with(
+        "Which relate to radiation?",
+        conversation_history=history,
+    )
