@@ -81,3 +81,18 @@ def test_analyze_query_rejects_empty_question():
 def test_query_plan_rejects_more_than_three_search_queries():
     with pytest.raises(ValueError):
         _plan(search_queries=["one", "two", "three", "four"])
+
+
+
+@pytest.mark.parametrize(
+    "chunk_type",
+    ["text", "table", "figure_caption", None],
+)
+def test_query_plan_accepts_supported_chunk_types(chunk_type):
+    plan = _plan(chunk_type=chunk_type)
+    assert plan.chunk_type == chunk_type
+
+
+def test_query_plan_rejects_unsupported_chunk_type():
+    with pytest.raises(ValueError):
+        _plan(chunk_type="image")
