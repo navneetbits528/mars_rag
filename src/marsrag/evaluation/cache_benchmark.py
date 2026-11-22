@@ -95,7 +95,7 @@ def run_cache_benchmark(*, repeats: int = 20, threshold: float = 0.93) -> dict:
             "embedding_generation_ms": round(embedding_seconds * 1000, 3),
             "initial_cache_miss_ms": round(initial_miss_seconds * 1000, 3),
             "cache_hit_lookup": _summary(hit_times),
-            "repeat_cache_lookup": _summary(miss_times),
+            "repeat_cache_hit_lookup": _summary(miss_times),
             "notes": [
                 "Lookup timings use a precomputed embedding and therefore exclude embedding API latency.",
                 "The initial miss and subsequent hits use a unique temporary cache key.",
