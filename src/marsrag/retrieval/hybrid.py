@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from typing import Any
@@ -16,44 +15,40 @@ def search_hybrid(
     top_k: int = 5,
     report_no: str = DEFAULT_REPORT_NO,
     rrf_k: int = DEFAULT_RRF_K,
+    section_path: str | None = None,
+    chunk_type: str | None = None,
 ) -> list[dict[str, Any]]:
-    """Combine dense and keyword retrieval using Reciprocal Rank Fusion."""
+    """Fuse dense and keyword search, with optional metadata filters."""
 
     if not query or not query.strip():
         raise ValueError("Query cannot be empty.")
-
     if not 1 <= top_k <= MAX_TOP_K:
         raise ValueError(f"top_k must be between 1 and {MAX_TOP_K}.")
-
     if not report_no or not report_no.strip():
         raise ValueError("report_no cannot be empty.")
-
     if rrf_k < 1:
         raise ValueError("rrf_k must be at least 1.")
+    if section_path is not None and not section_path.strip():
+        raise ValueError("section_path cannot be empty when provided.")
+    if chunk_type is not None and not chunk_type.strip():
+        raise ValueError("chunk_type cannot be empty when provided.")
 
     candidate_k = min(max(top_k * 3, 10), MAX_TOP_K)
-
-    dense_results = search_dense(
-        query=query,
-        top_k=candidate_k,
-        report_no=report_no,
-    )
-
-    keyword_results = search_keyword(
-        query=query,
-        top_k=candidate_k,
-        report_no=report_no,
-    )
+    search_filters = {
+        "query": query,
+        "top_k": candidate_k,
+        "report_no": report_no,
+        "section_path": section_path,
+        "chunk_type": chunk_type,
+    }
+    dense_results = search_dense(**search_filters)
+    keyword_results = search_keyword(**search_filters)
 
     fused: dict[str, dict[str, Any]] = {}
 
-    def add_results(
-        results: list[dict[str, Any]],
-        source: str,
-    ) -> None:
+    def add_results(results: list[dict[str, Any]], source: str) -> None:
         for rank, result in enumerate(results, start=1):
             chunk_id = result["chunk_id"]
-
             if chunk_id not in fused:
                 fused[chunk_id] = {
                     **result,
@@ -63,7 +58,6 @@ def search_hybrid(
                     "keyword_score": None,
                     "rrf_score": 0.0,
                 }
-
             fused[chunk_id][f"{source}_rank"] = rank
             fused[chunk_id][f"{source}_score"] = (
                 result.get("similarity")
@@ -80,5 +74,4 @@ def search_hybrid(
         key=lambda item: item["rrf_score"],
         reverse=True,
     )[:top_k]
-
     return expand_parent_context(ranked_results)
