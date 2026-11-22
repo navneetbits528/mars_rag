@@ -80,6 +80,6 @@ def _find_exact_value(text: str, values: list[str]) -> str | None:
     """Find a corpus value only when it appears as a complete literal token."""
     matches = [
         value for value in values
-        if re.search(r"(?<![A-Za-z0-9])" + re.escape(value) + r"(?![A-Za-z0-9])", text, re.I)
+        if re.search(r"(?<![A-Za-z0-9.])" + re.escape(value) + r"(?![A-Za-z0-9.])", text, re.I)
     ]
     return max(matches, key=len) if matches else None
