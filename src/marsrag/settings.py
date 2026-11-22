@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     admin_api_key: str = Field(default="change-this-demo-admin-key", repr=False)
     openai_max_requests: int = 10
     max_requests_per_qa: int = 12
+    semantic_cache_enabled: bool = True
+    semantic_cache_ttl_seconds: int = 86400
+    semantic_cache_similarity_threshold: float = 0.93
     daily_cost_limit_usd: float = 2.0
     max_retries: int = 2
     retry_base_seconds: float = 0.5
@@ -53,6 +56,20 @@ class Settings(BaseSettings):
     def valid_budget(cls, value):
         if value < 1:
             raise ValueError("API request limits must be at least 1.")
+        return value
+
+    @field_validator("semantic_cache_ttl_seconds")
+    @classmethod
+    def valid_cache_ttl(cls, value):
+        if value < 1:
+            raise ValueError("SEMANTIC_CACHE_TTL_SECONDS must be at least 1.")
+        return value
+
+    @field_validator("semantic_cache_similarity_threshold")
+    @classmethod
+    def valid_cache_threshold(cls, value):
+        if not 0.0 < value <= 1.0:
+            raise ValueError("SEMANTIC_CACHE_SIMILARITY_THRESHOLD must be in (0, 1].")
         return value
 
     @field_validator("chunk_overlap_ratio")
