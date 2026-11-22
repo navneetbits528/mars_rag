@@ -42,6 +42,7 @@ def find_cached_answer(
     cache_key: str,
     *,
     similarity_threshold: float = DEFAULT_SIMILARITY_THRESHOLD,
+    query_embedding: list[float] | None = None,
 ) -> AnswerResponse | None:
     """Return a verified, unexpired answer only when its question is highly similar."""
     if not question or not question.strip():
@@ -49,7 +50,7 @@ def find_cached_answer(
     if not 0.0 < similarity_threshold <= 1.0:
         raise ValueError("similarity_threshold must be in (0, 1].")
 
-    vector = json.dumps(embed_query(question.strip()))
+    vector = json.dumps(query_embedding if query_embedding is not None else embed_query(question.strip()))
     row = fetch_one(
         """
         SELECT answer, 1 - (question_embedding <=> %s::vector) AS similarity
@@ -80,6 +81,7 @@ def store_verified_answer(
     response: AnswerResponse,
     *,
     ttl_seconds: int,
+    query_embedding: list[float] | None = None,
 ) -> bool:
     """Persist only fully verified, non-abstaining answers."""
     if not question or not question.strip():
@@ -89,7 +91,7 @@ def store_verified_answer(
     if response.abstained or not response.verified:
         return False
 
-    vector = json.dumps(embed_query(question.strip()))
+    vector = json.dumps(query_embedding if query_embedding is not None else embed_query(question.strip()))
     answer_json = json.dumps(response.model_dump(mode="json"), ensure_ascii=False)
     execute(
         """
