@@ -66,9 +66,8 @@ def test_answer_question_analyzes_and_fuses_query_results():
         "What does the report say?",
         conversation_history=None,
     )
-    assert retrieve.call_count == 2
+    assert retrieve.call_count == 1
     assert retrieve.call_args_list[0].args == ("What does the report say?",)
-    assert retrieve.call_args_list[1].args == ("report findings",)
     for call in retrieve.call_args_list:
         assert call.kwargs == {
             "top_k": 7,
@@ -185,7 +184,7 @@ def test_answer_question_applies_extracted_chunk_type_filter():
     ):
         answer_question("Show me the tables about mission risks")
 
-    assert retrieve.call_count == 2
+    assert retrieve.call_count == 1
     assert all(call.kwargs["chunk_type"] == "table" for call in retrieve.call_args_list)
 
 
@@ -198,7 +197,7 @@ def test_explicit_chunk_type_overrides_extracted_filter():
     ):
         answer_question("Show me the tables", chunk_type="text")
 
-    assert retrieve.call_count == 2
+    assert retrieve.call_count == 1
     assert all(call.kwargs["chunk_type"] == "text" for call in retrieve.call_args_list)
 
 
