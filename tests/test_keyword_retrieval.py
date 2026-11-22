@@ -6,13 +6,23 @@ from marsrag.retrieval import keyword
 
 
 def test_search_keyword_returns_results():
-    expected = [{"chunk_id": "chunk-1", "report_no": "NASA-HRP-EVIDENCE"}]
-    with patch.object(keyword, "fetch_all", return_value=[]) as mock_fetch:
+    expected = [
+        {
+            "chunk_id": "chunk-1",
+            "report_no": "NASA-HRP-EVIDENCE",
+            "page": 16,
+            "content": "Nutritional risks during spaceflight.",
+            "keyword_score": 0.25,
+        }
+    ]
+    with patch.object(
+        keyword, "fetch_all", return_value=expected
+    ) as mock_fetch:
         results = keyword.search_keyword(
             "nutritional risks spaceflight", top_k=3
         )
 
-    assert results == []
+    assert results == expected
     mock_fetch.assert_called_once()
     sql, params = mock_fetch.call_args.args
     assert "content_tsv" in sql
