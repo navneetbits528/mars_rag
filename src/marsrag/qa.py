@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Sequence
 
 from marsrag.generation import AnswerResponse, generate_answer
 from marsrag.query_understanding import analyze_query
@@ -59,13 +59,17 @@ def answer_question(
     chunk_type: str | None = None,
     use_reranker: bool = False,
     model_tier: str = "main",
+    conversation_history: Sequence[dict[str, str]] | None = None,
 ) -> AnswerResponse:
-    """Analyze, decompose when needed, retrieve evidence, and generate an answer."""
+    """Analyze, retrieve, and answer; history is used only to resolve follow-ups."""
     if not question or not question.strip():
         raise ValueError("Question cannot be empty.")
 
     original_question = question.strip()
-    plan = analyze_query(original_question)
+    plan = analyze_query(
+        original_question,
+        conversation_history=conversation_history,
+    )
 
     if plan.route == "clarification" and plan.clarification_question:
         return AnswerResponse(
