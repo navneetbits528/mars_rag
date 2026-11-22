@@ -6,6 +6,8 @@ from langgraph.graph import END, START, StateGraph
 
 from marsrag.filter_resolution import ResolvedFilters, resolve_filters
 from marsrag.generation import AnswerResponse, generate_answer
+from marsrag.llm import RequestBudgetExceeded, request_api_budget
+from marsrag.settings import get_settings
 from marsrag.query_understanding import QueryPlan, analyze_query
 from marsrag.retrieval.hybrid import search_hybrid
 
@@ -192,16 +194,25 @@ def answer_question(
     if not question or not question.strip():
         raise ValueError("Question cannot be empty.")
 
-    result = _qa_graph.invoke(
-        {
-            "question": question.strip(),
-            "report_no": report_no,
-            "top_k": top_k,
-            "section_path": section_path,
-            "chunk_type": chunk_type,
-            "use_reranker": use_reranker,
-            "model_tier": model_tier,
-            "conversation_history": conversation_history,
-        }
-    )
+    try:
+        with request_api_budget(get_settings().max_requests_per_qa):
+            result = _qa_graph.invoke(
+                {
+                    "question": question.strip(),
+                    "report_no": report_no,
+                    "top_k": top_k,
+                    "section_path": section_path,
+                    "chunk_type": chunk_type,
+                    "use_reranker": use_reranker,
+                    "model_tier": model_tier,
+                    "conversation_history": conversation_history,
+                }
+            )
+    except RequestBudgetExceeded:
+        return AnswerResponse(
+            answer="This request reached its configured AI API-call limit. Please simplify the question or try again later.",
+            abstained=True,
+            verified=False,
+            reason="Per-request API budget exhausted.",
+        )
     return result["response"]
