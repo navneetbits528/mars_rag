@@ -1,8 +1,34 @@
 from __future__ import annotations
 
+from typing import Any
+
 from marsrag.generation import AnswerResponse, generate_answer
+from marsrag.query_understanding import analyze_query
 from marsrag.retrieval.dense import DEFAULT_REPORT_NO
 from marsrag.retrieval.hybrid import search_hybrid
+
+QUERY_RRF_K = 60
+
+
+def _merge_query_results(
+    result_sets: list[list[dict[str, Any]]],
+    *,
+    top_k: int,
+) -> list[dict[str, Any]]:
+    """Fuse ranked results from multiple query variants using reciprocal rank."""
+    merged: dict[str, dict[str, Any]] = {}
+    for results in result_sets:
+        for rank, source in enumerate(results, start=1):
+            chunk_id = source["chunk_id"]
+            if chunk_id not in merged:
+                merged[chunk_id] = {**source, "query_rrf_score": 0.0}
+            merged[chunk_id]["query_rrf_score"] += 1.0 / (QUERY_RRF_K + rank)
+
+    return sorted(
+        merged.values(),
+        key=lambda item: item["query_rrf_score"],
+        reverse=True,
+    )[:top_k]
 
 
 def answer_question(
@@ -15,21 +41,37 @@ def answer_question(
     use_reranker: bool = False,
     model_tier: str = "main",
 ) -> AnswerResponse:
-    """Run hybrid retrieval followed by grounded answer generation.
-
-    Retrieval applies the document and metadata filters before generation.
-    Citation verification is performed by generate_answer against the exact
-    chunks returned by retrieval.
-    """
+    """Analyze the question, retrieve across query variants, then generate an answer."""
     if not question or not question.strip():
         raise ValueError("Question cannot be empty.")
 
-    sources = search_hybrid(
-        question.strip(),
-        top_k=top_k,
-        report_no=report_no,
-        section_path=section_path,
-        chunk_type=chunk_type,
-        use_reranker=use_reranker,
-    )
-    return generate_answer(question.strip(), sources, model_tier=model_tier)
+    original_question = question.strip()
+    plan = analyze_query(original_question)
+
+    if plan.route == "clarification" and plan.clarification_question:
+        return AnswerResponse(
+            answer=plan.clarification_question,
+            abstained=True,
+            verified=False,
+            citations=[],
+            reason="Clarification is required before searching the report.",
+        )
+
+    queries = list(dict.fromkeys(
+        [plan.standalone_query, *plan.search_queries]
+    ))[:3]
+
+    result_sets = [
+        search_hybrid(
+            query,
+            top_k=top_k,
+            report_no=report_no,
+            section_path=section_path,
+            chunk_type=chunk_type,
+            use_reranker=use_reranker,
+        )
+        for query in queries
+    ]
+    sources = _merge_query_results(result_sets, top_k=top_k)
+
+    return generate_answer(original_question, sources, model_tier=model_tier)
