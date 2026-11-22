@@ -6,6 +6,7 @@ from marsrag.generation import (
     ClaimVerification,
     GeneratedAnswer,
     generate_answer,
+    stream_draft_answer,
     verify_citations,
     verify_claim_support,
 )
@@ -200,3 +201,26 @@ def test_generation_abstains_when_claim_verification_fails():
     assert result.abstained is True
     assert result.verified is False
     assert result.reason == "Claim-level evidence verification failed."
+
+
+
+def test_stream_draft_answer_yields_provisional_tokens():
+    with (
+        patch("marsrag.generation.build_chat_model") as build_model,
+        patch("marsrag.generation.stream_chat", return_value=iter(["Human ", "spaceflight ", "risks."])) as stream,
+    ):
+        tokens = list(stream_draft_answer("What are the risks?", _sources()))
+
+    assert tokens == ["Human ", "spaceflight ", "risks."]
+    build_model.assert_called_once_with(
+        tier="main",
+        streaming=True,
+        stream_usage=True,
+    )
+    stream.assert_called_once()
+
+
+def test_stream_draft_answer_does_not_call_model_without_sources():
+    with patch("marsrag.generation.build_chat_model") as build_model:
+        assert list(stream_draft_answer("What are the risks?", [])) == []
+    build_model.assert_not_called()
