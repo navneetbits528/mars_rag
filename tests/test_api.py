@@ -1,3 +1,5 @@
+import json
+
 from fastapi.testclient import TestClient
 
 from marsrag.api import main
@@ -65,6 +67,55 @@ def test_ask_endpoint_returns_abstention(monkeypatch):
     assert response.status_code == 200
     assert response.json()["abstained"] is True
     assert response.json()["verified"] is False
+
+
+def test_ask_stream_emits_answer_and_done_events(monkeypatch):
+    expected = AnswerResponse(
+        answer="Evidence-backed answer.",
+        abstained=False,
+        verified=True,
+        citations=[],
+    )
+    captured = {}
+
+    def fake_answer_question(question, **kwargs):
+        captured["question"] = question
+        captured.update(kwargs)
+        return expected
+
+    monkeypatch.setattr(main, "answer_question", fake_answer_question)
+
+    response = client.post(
+        "/ask/stream",
+        json={"question": "Explain the evidence.", "report_no": "NASA-HRP-EVIDENCE"},
+    )
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/event-stream")
+    assert "Cache-Control" in response.headers
+    events = response.text.strip().split("\n\n")
+    assert events[0].startswith("event: answer\ndata: ")
+    payload = json.loads(events[0].split("data: ", 1)[1])
+    assert payload["answer"] == expected.answer
+    assert payload["verified"] is True
+    assert events[1] == "event: done\ndata: {}"
+    assert captured["question"] == "Explain the evidence."
+    assert captured["report_no"] == "NASA-HRP-EVIDENCE"
+
+
+def test_ask_stream_emits_error_event_for_invalid_question(monkeypatch):
+    def fail_answer_question(*args, **kwargs):
+        raise ValueError("Question cannot be empty.")
+
+    monkeypatch.setattr(main, "answer_question", fail_answer_question)
+
+    response = client.post("/ask/stream", json={"question": "   "})
+
+    assert response.status_code == 200
+    assert "event: error\ndata: " in response.text
+    assert json.loads(response.text.split("data: ", 1)[1].split("\n", 1)[0]) == {
+        "detail": "Question cannot be empty."
+    }
 
 
 def test_ask_endpoint_validates_top_k():
