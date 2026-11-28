@@ -202,6 +202,44 @@ def stream_draft_answer(
     yield from stream_chat(model, messages)
 
 
+def generate_conversational_answer(
+    question: str,
+    *,
+    model_tier: str = "main",
+) -> AnswerResponse:
+    """Answer a conversational question without implying document verification."""
+    if not question or not question.strip():
+        raise ValueError("Question cannot be empty.")
+
+    messages = [
+        SystemMessage(
+            content=(
+                "Respond naturally and helpfully to the user's conversational question "
+                "using general model knowledge. Do not claim that your response is based "
+                "on the NASA documents or cite sources you have not retrieved. For personal "
+                "eligibility, access, or future travel questions, explain relevant uncertainty "
+                "and do not make guarantees. Keep the answer concise."
+            )
+        ),
+        HumanMessage(content=question.strip()),
+    ]
+    model = build_chat_model(tier=model_tier)
+    result = invoke_chat(model, messages)
+    answer = getattr(result, "content", "")
+    if not isinstance(answer, str) or not answer.strip():
+        answer = (
+            "I couldn't formulate a reliable conversational response. "
+            "Please try rephrasing your question."
+        )
+    return AnswerResponse(
+        answer=answer.strip(),
+        abstained=False,
+        verified=False,
+        citations=[],
+        reason="Conversational response; not verified against NASA documents.",
+    )
+
+
 def generate_answer(
     question: str,
     sources: list[dict[str, Any]],
