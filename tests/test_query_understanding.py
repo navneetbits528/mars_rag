@@ -146,3 +146,17 @@ def test_analyze_query_caps_history_to_ten_messages():
     assert len(history_messages) == 10
     assert history_messages[0].content == "turn 2"
     assert history_messages[-1].content == "turn 11"
+
+
+@pytest.mark.parametrize("route", ["conversational", "out_of_scope"])
+def test_analyze_query_accepts_non_retrieval_routes(route):
+    expected = _plan(route=route)
+    with (
+        patch("marsrag.query_understanding.build_chat_model") as build_model,
+        patch("marsrag.query_understanding.invoke_chat", return_value=expected),
+    ):
+        build_model.return_value.with_structured_output.return_value = object()
+        result = analyze_query("Can I go to Mars?")
+
+    assert result.route == route
+    assert result.standalone_query == expected.standalone_query
