@@ -417,7 +417,3 @@ Check `.env.example` and the settings module for the complete set of supported o
 ## Current scope and limitations
 
 This repository is an evaluated project application and development/demo setup. It is not a NASA product or an official NASA service. It does not provide personal medical, travel, astronaut-selection, or mission eligibility decisions. The knowledge available to the application is limited to the documents ingested into its database, except for the separately labelled conversational response path.
-
-## License
-
-Add the license and attribution terms applicable to your source documents and project before public distribution.
