@@ -235,3 +235,26 @@ def test_stream_draft_answer_does_not_call_model_without_sources():
     with patch("marsrag.generation.build_chat_model") as build_model:
         assert list(stream_draft_answer("What are the risks?", [])) == []
     build_model.assert_not_called()
+
+
+def test_generate_conversational_answer_is_explicitly_not_document_verified():
+    from types import SimpleNamespace
+    from marsrag.generation import generate_conversational_answer
+
+    with (
+        patch("marsrag.generation.build_chat_model") as build_model,
+        patch(
+            "marsrag.generation.invoke_chat",
+            return_value=SimpleNamespace(content="A crewed Mars trip is not currently a routine option."),
+        ) as invoke,
+    ):
+        build_model.return_value = object()
+        result = generate_conversational_answer("Can I go to Mars?", model_tier="fast")
+
+    assert result.answer.startswith("A crewed Mars trip")
+    assert result.abstained is False
+    assert result.verified is False
+    assert result.citations == []
+    assert result.reason == "Conversational response; not verified against NASA documents."
+    build_model.assert_called_once_with(tier="fast")
+    invoke.assert_called_once()
