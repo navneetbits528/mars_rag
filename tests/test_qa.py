@@ -423,3 +423,45 @@ def test_stream_answer_question_returns_clarification_without_tokens():
     assert events[-1][1]["answer"] == "Which mission do you mean?"
     draft.assert_not_called()
     retrieve.assert_not_called()
+
+
+def test_conversational_question_skips_retrieval_and_is_not_document_verified():
+    from types import SimpleNamespace
+
+    plan = _plan(route="conversational")
+    expected = AnswerResponse(
+        answer="A crewed Mars trip is not currently a routine option.",
+        abstained=False,
+        verified=False,
+        citations=[],
+        reason="Conversational response; not verified against NASA documents.",
+    )
+    with (
+        patch("marsrag.qa.analyze_query", return_value=plan),
+        patch("marsrag.qa.generate_conversational_answer", return_value=expected) as respond,
+        patch("marsrag.qa.search_hybrid") as retrieve,
+        patch("marsrag.qa.generate_answer") as grounded_generate,
+    ):
+        result = answer_question("Can I go to Mars?", model_tier="fast")
+
+    assert result is expected
+    respond.assert_called_once_with("Can I go to Mars?", model_tier="fast")
+    retrieve.assert_not_called()
+    grounded_generate.assert_not_called()
+
+
+def test_out_of_scope_question_returns_scope_message_without_retrieval():
+    plan = _plan(route="out_of_scope")
+    with (
+        patch("marsrag.qa.analyze_query", return_value=plan),
+        patch("marsrag.qa.search_hybrid") as retrieve,
+        patch("marsrag.qa.generate_answer") as grounded_generate,
+    ):
+        result = answer_question("Who won yesterday's cricket match?")
+
+    assert result.abstained is True
+    assert result.verified is False
+    assert "outside" in result.answer
+    assert result.reason == "Question is outside the application's supported knowledge scope."
+    retrieve.assert_not_called()
+    grounded_generate.assert_not_called()
