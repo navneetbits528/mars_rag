@@ -105,9 +105,11 @@ def main() -> None:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
             if message.get("abstained"):
-                st.warning("This response could not be verified against the document evidence.")
+                st.warning(message.get("reason") or "This response could not be verified against the document evidence.")
             elif message.get("verified"):
                 st.success("Verified against retrieved document evidence.")
+            elif message.get("reason"):
+                st.info(message["reason"])
             _render_citations(message.get("citations", []))
 
     question = st.chat_input("Ask a question about the documents...")
@@ -144,9 +146,11 @@ def main() -> None:
             draft_placeholder.empty()
             st.markdown(result.get("answer", "No answer returned."))
             if result.get("abstained"):
-                st.warning("This response could not be verified against the document evidence.")
+                st.warning(result.get("reason") or "This response could not be verified against the document evidence.")
             elif result.get("verified"):
                 st.success("Verified against retrieved document evidence.")
+            elif result.get("reason"):
+                st.info(result["reason"])
             _render_citations(result.get("citations", []))
             st.session_state.messages.append(
                 {
@@ -155,6 +159,7 @@ def main() -> None:
                     "verified": result.get("verified", False),
                     "abstained": result.get("abstained", False),
                     "citations": result.get("citations", []),
+                    "reason": result.get("reason"),
                 }
             )
         except requests.RequestException as exc:
