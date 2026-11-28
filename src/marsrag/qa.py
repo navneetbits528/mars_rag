@@ -6,7 +6,12 @@ import logging
 from langgraph.graph import END, START, StateGraph
 
 from marsrag.filter_resolution import ResolvedFilters, resolve_filters
-from marsrag.generation import AnswerResponse, generate_answer, stream_draft_answer
+from marsrag.generation import (
+    AnswerResponse,
+    generate_answer,
+    generate_conversational_answer,
+    stream_draft_answer,
+)
 from marsrag.llm import RequestBudgetExceeded, request_api_budget
 from marsrag.settings import get_settings
 from marsrag.llm import embed_query
@@ -83,6 +88,29 @@ def _analyze_node(state: QAState) -> dict[str, Any]:
                 verified=False,
                 citations=[],
                 reason="Clarification is required before searching the report.",
+            ),
+        }
+    if plan.route == "conversational":
+        return {
+            "plan": plan,
+            "response": generate_conversational_answer(
+                state["question"],
+                model_tier=state["model_tier"],
+            ),
+        }
+    if plan.route == "out_of_scope":
+        return {
+            "plan": plan,
+            "response": AnswerResponse(
+                answer=(
+                    "I can help with questions about NASA documents, Mars missions, "
+                    "and human spaceflight. This question appears to be outside that "
+                    "knowledge area, so I won't invent a document-grounded answer."
+                ),
+                abstained=True,
+                verified=False,
+                citations=[],
+                reason="Question is outside the application's supported knowledge scope.",
             ),
         }
     return {"plan": plan}
